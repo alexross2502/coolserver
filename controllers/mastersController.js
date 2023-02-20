@@ -13,11 +13,15 @@ class MastersController {
         Validator.checkRating(rating) &&
         (await Validator.checkTownForMaster(townName))
       ) {
+        let createdAt = Date.now();
+        let updatedAt = Date.now();
         const master = await Masters.create({
           name,
           surname,
           rating,
           townName,
+          createdAt,
+          updatedAt,
         });
         return res.json(master);
       } else {

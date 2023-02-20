@@ -7,7 +7,14 @@ class ClientsController {
     try {
       const { name, email } = req.body;
       if (Validator.checkName(name) && Validator.checkEmail(email)) {
-        const client = await Clients.create({ name, email });
+        let createdAt = Date.now();
+        let updatedAt = Date.now();
+        const client = await Clients.create({
+          name,
+          email,
+          createdAt,
+          updatetAt,
+        });
         return res.json(client);
       } else {
         return res.json("Неверные данные");

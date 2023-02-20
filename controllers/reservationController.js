@@ -55,11 +55,15 @@ class ReservationController {
       (await Validator.sameTime(day, hours, master_id))
     ) {
       try {
+        let createdAt = Date.now();
+        let updatedAt = Date.now();
         const reservation = await Reservation.create({
           day,
           hours,
           master_id,
           towns_id,
+          createdAt,
+          updatedAt,
         });
         return res.json(reservation);
       } catch (e) {
@@ -179,11 +183,15 @@ class ReservationController {
       (await Validator.sameTime(day, hours, master_id))
     ) {
       try {
+        let createdAt = Date.now();
+        let updatedAt = Date.now();
         const reservation = await Reservation.create({
           day,
           hours,
           master_id,
           towns_id,
+          createdAt,
+          updatedAt,
         });
 
         //Отправка письма
