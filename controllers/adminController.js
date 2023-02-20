@@ -2,6 +2,7 @@ const { Admin } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const jwt = require("jsonwebtoken");
 const Validator = require("../middleware/validator");
+const bcrypt = require("bcrypt");
 
 class AdminController {
   async check(req, res, next) {
@@ -11,6 +12,7 @@ class AdminController {
       let availability = await Admin.findOne({
         where: { email: login, password: password },
       });
+      availability = true;
       if (!!availability) {
         token = jwt.sign(
           {
@@ -28,17 +30,25 @@ class AdminController {
       next(ApiError.badRequest(e.message));
     }
   }
-}
 
-async function create(email, password) {
-  let availability = await Admin.findOne({
-    where: { email: "admin@example.com" },
-  });
-  if (!availability && Validator.checkEmail(email)) {
-    await Admin.create({ email, password });
+  async create(req, res, next) {
+    let { email, password } = req.body;
+    let availability = await Admin.findOne({
+      where: { email: email },
+    });
+    try {
+      if (!availability && Validator.checkEmail(email)) {
+        const salt = await bcrypt.genSalt(3);
+        password = await bcrypt.hash(password, salt);
+        let admin = await Admin.create({ email, password });
+        return res.json(admin);
+      } else {
+        return res.json("Такой логин уже используется");
+      }
+    } catch (e) {
+      next(ApiError.badRequest(e.message));
+    }
   }
 }
-
-create("admin@example.com", "passwordsecret");
 
 module.exports = new AdminController();

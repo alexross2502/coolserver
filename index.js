@@ -3,7 +3,6 @@ const app = express();
 const PORT = process.env.PORT || 3306;
 const cors = require("cors");
 const sequelize = require("./db");
-const models = require("./models/models");
 const router = require("./routes/index");
 const errorHandler = require("./middleware/ErrorHandlingMiddleware");
 const passport = require("passport");
