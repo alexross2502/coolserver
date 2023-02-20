@@ -14,6 +14,8 @@ module.exports = {
       },
       day: { type: DataTypes.STRING, allowNull: false },
       hours: { type: DataTypes.STRING, allowNull: false },
+      createdAt: { type: DataTypes.CHAR(30) },
+      updatedAt: { type: DataTypes.CHAR(30) },
     });
   },
 

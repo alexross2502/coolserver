@@ -19,6 +19,8 @@ module.exports = {
         validate: { min: 1, max: 5 },
         allowNull: false,
       },
+      createdAt: { type: DataTypes.CHAR(30) },
+      updatedAt: { type: DataTypes.CHAR(30) },
     });
   },
 
