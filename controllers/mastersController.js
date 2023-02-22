@@ -1,4 +1,4 @@
-const { Masters } = require("../models/models");
+const { Masters, Towns } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const Validator = require("../middleware/validator");
 
@@ -9,9 +9,7 @@ class MastersController {
       if (
         Validator.checkName(name) &&
         Validator.checkName(surname) &&
-        Validator.checkName(townName) &&
-        Validator.checkRating(rating) &&
-        (await Validator.checkTownForMaster(townName))
+        Validator.checkRating(rating)
       ) {
         let createdAt = Date.now();
         let updatedAt = Date.now();
@@ -33,7 +31,10 @@ class MastersController {
   }
 
   async getAll(req, res) {
-    const masters = await Masters.findAll();
+    const masters = await Masters.findAll({
+      attributes: ["id", "name", "surname", "rating", "townId"],
+    });
+
     return res.json(masters);
   }
 

@@ -13,8 +13,9 @@ class ClientsController {
           name,
           email,
           createdAt,
-          updatetAt,
+          updatedAt,
         });
+
         return res.json(client);
       } else {
         return res.json("Неверные данные");
@@ -26,6 +27,7 @@ class ClientsController {
 
   async getAll(req, res) {
     const clients = await Clients.findAll();
+
     return res.json(clients);
   }
 

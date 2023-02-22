@@ -35,7 +35,17 @@ async function check(name, email) {
 
 class ReservationController {
   async getAll(req, res) {
-    const reservation = await Reservation.findAll();
+    const reservation = await Reservation.findAll({
+      attributes: [
+        "id",
+        "day",
+        "startTime",
+        "hours",
+        "master_id",
+        "towns_id",
+        "clientId",
+      ],
+    });
     return res.json(reservation);
   }
 

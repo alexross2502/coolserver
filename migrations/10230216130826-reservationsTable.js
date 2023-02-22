@@ -13,7 +13,8 @@ module.exports = {
         unique: true,
       },
       day: { type: DataTypes.STRING, allowNull: false },
-      hours: { type: DataTypes.STRING, allowNull: false },
+      hours: { type: DataTypes.INTEGER, allowNull: false },
+      startTime: { type: DataTypes.INTEGER, allowNull: false },
       createdAt: { type: DataTypes.CHAR(30) },
       updatedAt: { type: DataTypes.CHAR(30) },
     });
