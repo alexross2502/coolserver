@@ -11,8 +11,6 @@ class TownsController {
         let updatedAt = Date.now();
         const town = await Towns.create({
           name: name,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
         });
         return res.json(town);
       } else {

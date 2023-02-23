@@ -1,11 +1,15 @@
 const { Masters, Towns } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const Validator = require("../middleware/validator");
+const { Sequelize } = require("../db");
+const db = require("../models/index");
+const { QueryTypes } = require("sequelize");
+const { v4: uuidv4 } = require("uuid");
 
 class MastersController {
   async create(req, res, next) {
     try {
-      const { name, surname, rating, townName } = req.body;
+      const { name, surname, rating, townId } = req.body;
       if (
         Validator.checkName(name) &&
         Validator.checkName(surname) &&
@@ -13,14 +17,23 @@ class MastersController {
       ) {
         let createdAt = Date.now();
         let updatedAt = Date.now();
-        const master = await Masters.create({
-          name,
-          surname,
-          rating,
-          townName,
-          createdAt,
-          updatedAt,
-        });
+        let myId = uuidv4();
+
+        let master = await db.sequelize.query(
+          "INSERT INTO `masters` (`id`, `name`, `surname`, `rating`, `townId`, `createdAt`, `updatedAt`) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          {
+            replacements: [
+              myId,
+              name,
+              surname,
+              rating,
+              townId,
+              createdAt,
+              updatedAt,
+            ],
+          }
+        );
+
         return res.json(master);
       } else {
         return res.json("Неверные данные");
@@ -49,6 +62,14 @@ class MastersController {
     const master = await Masters.findAll({ where: { townName: name } });
     return res.json(master);
   }
+} /*
+async function create(name, surname, rating, townId) {
+  let abc = uuidv4();
+  console.log(abc);
+  await db.sequelize.query(
+    "INSERT INTO `masters` (`id`, `name`, `surname`, `rating`, `townId`) VALUES (?, ?, ?, ?, ?)",
+    { replacements: [abc, name, surname, rating, townId] }
+  );
 }
-
+create("dsadas", "daads", 4, "e55a0ac7-b360-11ed-87cc-448a5b2c2d83");*/
 module.exports = new MastersController();

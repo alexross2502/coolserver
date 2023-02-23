@@ -72,8 +72,6 @@ class ReservationController {
           hours,
           master_id,
           towns_id,
-          createdAt,
-          updatedAt,
         });
         return res.json(reservation);
       } catch (e) {
