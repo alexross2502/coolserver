@@ -3,7 +3,6 @@ const ApiError = require("../error/ApiError");
 const Validator = require("../middleware/validator");
 const { Sequelize } = require("../db");
 const db = require("../models/index");
-const { QueryTypes } = require("sequelize");
 const { v4: uuidv4 } = require("uuid");
 
 class MastersController {
@@ -62,14 +61,6 @@ class MastersController {
     const master = await Masters.findAll({ where: { townName: name } });
     return res.json(master);
   }
-} /*
-async function create(name, surname, rating, townId) {
-  let abc = uuidv4();
-  console.log(abc);
-  await db.sequelize.query(
-    "INSERT INTO `masters` (`id`, `name`, `surname`, `rating`, `townId`) VALUES (?, ?, ?, ?, ?)",
-    { replacements: [abc, name, surname, rating, townId] }
-  );
 }
-create("dsadas", "daads", 4, "e55a0ac7-b360-11ed-87cc-448a5b2c2d83");*/
+
 module.exports = new MastersController();
