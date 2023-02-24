@@ -3,7 +3,6 @@ const ApiError = require("../error/ApiError");
 const Validator = require("../middleware/validator");
 const { Sequelize } = require("../db");
 const db = require("../models/index");
-const { v4: uuidv4 } = require("uuid");
 
 class MastersController {
   async create(req, res, next) {
