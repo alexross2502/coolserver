@@ -16,23 +16,14 @@ class MastersController {
       ) {
         let createdAt = Date.now();
         let updatedAt = Date.now();
-        let myId = uuidv4();
-
-        let master = await db.sequelize.query(
-          "INSERT INTO `masters` (`id`, `name`, `surname`, `rating`, `townId`, `createdAt`, `updatedAt`) VALUES (?, ?, ?, ?, ?, ?, ?)",
-          {
-            replacements: [
-              myId,
-              name,
-              surname,
-              rating,
-              townId,
-              createdAt,
-              updatedAt,
-            ],
-          }
-        );
-
+        const master = await Masters.create({
+          name,
+          surname,
+          rating,
+          townId,
+          createdAt,
+          updatedAt,
+        });
         return res.json(master);
       } else {
         return res.json("Неверные данные");

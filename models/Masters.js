@@ -15,6 +15,7 @@ const Masters = sequelize.define("masters", {
     validate: { min: 1, max: 5 },
     allowNull: false,
   },
+  townId: { type: DataTypes.CHAR(36), allowNull: true },
 });
 
 module.exports = { Masters };

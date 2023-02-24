@@ -3,7 +3,6 @@ const ApiError = require("../error/ApiError");
 const nodemailer = require("nodemailer");
 const Validator = require("../middleware/validator");
 const db = require("../models/index");
-const { v4: uuidv4 } = require("uuid");
 
 ////Отправка письма
 async function sendMail(recipient, name, surname, rating) {
@@ -54,25 +53,16 @@ class ReservationController {
     try {
       let createdAt = Date.now();
       let updatedAt = Date.now();
-      let myId = uuidv4();
-      day = String(day);
-      console.log(typeof day);
-      let reservation = await db.sequelize.query(
-        "INSERT INTO `reservations` (`id`, `day`, `hours`, `master_id`, `towns_id`, `clientId`, `createdAt`, `updatedAt`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
 
-        {
-          replacements: [
-            myId,
-            day,
-            hours,
-            master_id,
-            towns_id,
-            clientId,
-            createdAt,
-            updatedAt,
-          ],
-        }
-      );
+      const reservation = await Reservation.create({
+        day,
+        hours,
+        master_id,
+        towns_id,
+        clientId,
+        createdAt,
+        updatedAt,
+      });
       return res.json(reservation);
     } catch (e) {
       next(ApiError.badRequest(e.message));
