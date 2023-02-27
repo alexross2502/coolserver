@@ -9,6 +9,7 @@ const Reservation = sequelize.define("reservations", {
     unique: true,
   },
   day: { type: DataTypes.INTEGER, allowNull: false },
+  size: { type: DataTypes.STRING, allowNull: false },
   hours: { type: DataTypes.INTEGER, allowNull: false },
   master_id: { type: DataTypes.CHAR(36), allowNull: true },
   towns_id: { type: DataTypes.CHAR(36), allowNull: true },

@@ -49,13 +49,14 @@ class ReservationController {
   }
 
   async create(req, res, next) {
-    let { day, hours, master_id, towns_id, clientId } = req.body;
+    let { day, size, hours, master_id, towns_id, clientId } = req.body;
     try {
       let createdAt = Date.now();
       let updatedAt = Date.now();
 
       const reservation = await Reservation.create({
         day,
+        size,
         hours,
         master_id,
         towns_id,
