@@ -1,13 +1,13 @@
 const { Sequelize } = require("sequelize");
 
 module.exports = new Sequelize(
-  "heroku_database",
-  "heroku_database",
-  "MAKROMINxxx111",
+  process.env.DB_USER,
+  process.env.DB_DATABASE,
+  process.env.DB_PASSWORD,
   {
     dialect: "mysql",
-    host: "db4free.net",
-    port: "3306",
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
   },
   {
     ssl: true,
