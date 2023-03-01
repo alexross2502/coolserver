@@ -1,7 +1,8 @@
-const { Reservation, Masters, Clients } = require("../models/models");
+const { Reservation, Masters, Clients, Towns } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const nodemailer = require("nodemailer");
 const Validator = require("../middleware/validator");
+const db = require("../models/index");
 
 ////Отправка письма
 async function sendMail(recipient, name, surname, rating) {
@@ -35,7 +36,17 @@ async function check(name, email) {
 
 class ReservationController {
   async getAll(req, res) {
-    const reservation = await Reservation.findAll();
+    const reservation = await Reservation.findAll({
+      attributes: [
+        "id",
+        "day",
+        "size",
+        "hours",
+        "master_id",
+        "towns_id",
+        "clientId",
+      ],
+    });
     return res.json(reservation);
   }
 
@@ -46,26 +57,25 @@ class ReservationController {
   }
 
   async create(req, res, next) {
-    const { day, hours, master_id, towns_id } = req.body;
-    if (
-      Validator.dateChecker(day, hours) &&
-      Validator.hoursChecker(hours) &&
-      (await Validator.checkCreateReservation(master_id, towns_id)) &&
-      Validator.dateRange(day) &&
-      (await Validator.sameTime(day, hours, master_id))
-    ) {
-      try {
-        const reservation = await Reservation.create({
-          day,
-          hours,
-          master_id,
-          towns_id,
-        });
-        return res.json(reservation);
-      } catch (e) {
-        next(ApiError.badRequest(e.message));
-      }
-    } else return res.json("Неверные данные");
+    let { day, size, hours, master_id, towns_id, clientId } = req.body;
+    try {
+      let createdAt = Date.now();
+      let updatedAt = Date.now();
+
+      const reservation = await Reservation.create({
+        day,
+        size,
+        hours,
+        master_id,
+        towns_id,
+        clientId,
+        createdAt,
+        updatedAt,
+      });
+      return res.json(reservation);
+    } catch (e) {
+      next(ApiError.badRequest(e.message));
+    }
   }
 
   async getAvailable(req, res, next) {
@@ -179,11 +189,15 @@ class ReservationController {
       (await Validator.sameTime(day, hours, master_id))
     ) {
       try {
+        let createdAt = Date.now();
+        let updatedAt = Date.now();
         const reservation = await Reservation.create({
           day,
           hours,
           master_id,
           towns_id,
+          createdAt,
+          updatedAt,
         });
 
         //Отправка письма

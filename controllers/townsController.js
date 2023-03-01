@@ -7,7 +7,11 @@ class TownsController {
     try {
       const { name } = req.body;
       if (Validator.checkName(name)) {
-        const town = await Towns.create({ name: name });
+        let createdAt = Date.now();
+        let updatedAt = Date.now();
+        const town = await Towns.create({
+          name: name,
+        });
         return res.json(town);
       } else {
         return res.json("Неверные данные");

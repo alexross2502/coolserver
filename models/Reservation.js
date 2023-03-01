@@ -8,8 +8,12 @@ const Reservation = sequelize.define("reservations", {
     primaryKey: true,
     unique: true,
   },
-  day: { type: DataTypes.STRING, allowNull: false },
-  hours: { type: DataTypes.STRING, allowNull: false },
+  day: { type: DataTypes.INTEGER, allowNull: false },
+  size: { type: DataTypes.CHAR(30), allowNull: false },
+  hours: { type: DataTypes.CHAR(30), allowNull: false },
+  master_id: { type: DataTypes.CHAR(36), allowNull: true },
+  towns_id: { type: DataTypes.CHAR(36), allowNull: true },
+  clientId: { type: DataTypes.CHAR(36), allowNull: true },
 });
 
 module.exports = { Reservation };

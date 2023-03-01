@@ -12,8 +12,12 @@ module.exports = {
         primaryKey: true,
         unique: true,
       },
-      day: { type: DataTypes.STRING, allowNull: false },
-      hours: { type: DataTypes.STRING, allowNull: false },
+      day: { type: DataTypes.INTEGER, allowNull: false },
+      size: { type: DataTypes.CHAR(30), allowNull: false },
+      hours: { type: DataTypes.CHAR(30), allowNull: false },
+      startTime: { type: DataTypes.INTEGER, allowNull: false },
+      createdAt: { type: DataTypes.CHAR(30) },
+      updatedAt: { type: DataTypes.CHAR(30) },
     });
   },
 

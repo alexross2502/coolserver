@@ -1,23 +1,27 @@
-const { Masters } = require("../models/models");
+const { Masters, Towns } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const Validator = require("../middleware/validator");
+const { Sequelize } = require("../db");
+const db = require("../models/index");
 
 class MastersController {
   async create(req, res, next) {
     try {
-      const { name, surname, rating, townName } = req.body;
+      const { name, surname, rating, townId } = req.body;
       if (
         Validator.checkName(name) &&
         Validator.checkName(surname) &&
-        Validator.checkName(townName) &&
-        Validator.checkRating(rating) &&
-        (await Validator.checkTownForMaster(townName))
+        Validator.checkRating(rating)
       ) {
+        let createdAt = Date.now();
+        let updatedAt = Date.now();
         const master = await Masters.create({
           name,
           surname,
           rating,
-          townName,
+          townId,
+          createdAt,
+          updatedAt,
         });
         return res.json(master);
       } else {
@@ -29,7 +33,10 @@ class MastersController {
   }
 
   async getAll(req, res) {
-    const masters = await Masters.findAll();
+    const masters = await Masters.findAll({
+      attributes: ["id", "name", "surname", "rating", "townId"],
+    });
+
     return res.json(masters);
   }
 
