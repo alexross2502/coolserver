@@ -1,19 +1,19 @@
-'use strict';
+"use strict";
 
-const { DataTypes, QueryInterface, Sequelize } = require('sequelize');
+const { DataTypes, QueryInterface, Sequelize } = require("sequelize");
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (QueryInterface, Sequelize) {
-    await QueryInterface.changeColumn('reservations', 'day', {
-      type: DataTypes.FLOAT
-    })
+  async up(QueryInterface, Sequelize) {
+    await QueryInterface.changeColumn("reservations", "day", {
+      type: DataTypes.BIGINT,
+    });
   },
 
-  async down (QueryInterface, Sequelize) {
+  async down(QueryInterface, Sequelize) {
     /** 
        unalterable 
     **/
-   return null
-  }
+    return null;
+  },
 };
