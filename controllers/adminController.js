@@ -25,20 +25,23 @@ class AdminController {
                 "dev-jwt",
                 { expiresIn: 60 * 60 * 3 }
               );
-              return res.json({
-                availability: true,
-                token: `Bearer ${token}`,
-              });
+              return res
+                .status(200)
+                .json({
+                  availability: true,
+                  token: `Bearer ${token}`,
+                })
+                .end();
             } else {
-              return res.json("Неверный пароль");
+              return res.status(400).json({ message: "wrong password" }).end();
             }
           }
         );
       } else {
-        return res.json("Пользователь с таким логином не найден");
+        return res.status(400).json({ message: "wrong login" }).end();
       }
     } catch (e) {
-      next(ApiError.badRequest(e.message));
+      return res.status(403).json({ message: "error" }).end();
     }
   }
 
@@ -59,12 +62,16 @@ class AdminController {
           createdAt,
           updatedAt,
         });
-        return res.json(admin);
+        if (admin) {
+          return res.status(200).json(admin).end();
+        } else {
+          return res.status(403).json({ message: "error" }).end();
+        }
       } else {
-        return res.json("Такой логин уже используется");
+        return res.status(400).json({ message: "wrong login" }).end();
       }
     } catch (e) {
-      next(ApiError.badRequest(e.message));
+      return res.status(403).json({ message: "error" }).end();
     }
   }
 }

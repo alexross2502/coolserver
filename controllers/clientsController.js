@@ -16,25 +16,32 @@ class ClientsController {
           updatedAt,
         });
 
-        return res.json(client);
+        return res.status(200).json(client).end();
       } else {
-        return res.json("Неверные данные");
+        return res.status(400).json({ message: "wrong data" }).end();
       }
     } catch (e) {
-      next(ApiError.badRequest(e.message));
+      return res.status(403).json({ message: "error" }).end();
     }
   }
 
   async getAll(req, res) {
     const clients = await Clients.findAll();
-
     return res.json(clients);
   }
 
   async destroy(req, res) {
-    const { id } = req.params;
-    const client = await Clients.destroy({ where: { id: id } });
-    return res.json(client);
+    try {
+      const { id } = req.params;
+      const client = await Clients.destroy({ where: { id: id } });
+      if (client) {
+        return res.status(200).json(client).end();
+      } else {
+        return res.status(400).json({ message: "wrong data" }).end();
+      }
+    } catch (e) {
+      return res.status(403).json({ message: "error" }).end();
+    }
   }
 }
 

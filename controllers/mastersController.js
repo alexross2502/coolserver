@@ -23,12 +23,12 @@ class MastersController {
           createdAt,
           updatedAt,
         });
-        return res.json(master);
+        return res.status(200).json(master).end();
       } else {
-        return res.json("Неверные данные");
+        return res.status(400).json({ message: "wrong data" }).end();
       }
     } catch (e) {
-      next(ApiError.badRequest(e.message));
+      return res.status(403).json({ message: "error" }).end();
     }
   }
 
@@ -43,14 +43,18 @@ class MastersController {
   async destroy(req, res) {
     const { id } = req.params;
     const master = await Masters.destroy({ where: { id: id } });
-    return res.json(master);
+    if (master) {
+      return res.status(200).json(master).end();
+    } else {
+      return res.status(400).json({ message: "wrong data" }).end();
+    }
   }
-
+  /*
   async getAvailable(req, res) {
     const { name } = req.params;
     const master = await Masters.findAll({ where: { townName: name } });
     return res.json(master);
-  }
+  }*/
 }
 
 module.exports = new MastersController();

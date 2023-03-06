@@ -12,12 +12,12 @@ class TownsController {
         const town = await Towns.create({
           name: name,
         });
-        return res.json(town);
+        return res.status(200).json(town).end();
       } else {
-        return res.json("Неверные данные");
+        return res.status(400).json({ message: "wrong data" }).end();
       }
     } catch (e) {
-      next(ApiError.badRequest(e.message));
+      return res.status(403).json({ message: "error" }).end();
     }
   }
 
@@ -29,7 +29,11 @@ class TownsController {
   async destroy(req, res) {
     const { id } = req.params;
     const towns = await Towns.destroy({ where: { id: id } });
-    return res.json(towns);
+    if (towns) {
+      return res.status(200).json(towns).end();
+    } else {
+      return res.status(400).json({ message: "wrong data" }).end();
+    }
   }
 }
 
