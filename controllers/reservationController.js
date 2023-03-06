@@ -4,18 +4,39 @@ const nodemailer = require("nodemailer");
 const Validator = require("../middleware/validator");
 const db = require("../models/index");
 
+////// Настройки для размера часов
+let timeSize = {
+  small: 1,
+  medium: 3,
+  large: 5,
+};
+
+//// Перевод timestamp в обычный вид
+function timestampToDate(timestamp) {
+  var d = new Date(timestamp);
+  return {
+    date:
+      ("0" + d.getDate()).slice(-2) +
+      "." +
+      ("0" + d.getMonth()).slice(-2) +
+      "." +
+      d.getFullYear(),
+    time: d.getHours(),
+  };
+}
+
 ////Отправка письма
 async function sendMail(recipient, name, surname, rating) {
   let transporter = nodemailer.createTransport({
-    host: "mail.ee",
+    host: process.env.POST_HOST,
     auth: {
-      user: "alexross19941994@mail.ee",
-      pass: "1aCN1c9XwT",
+      user: process.env.EMAIL,
+      pass: process.env.PASSWORD,
     },
   });
 
   let result = await transporter.sendMail({
-    from: "alexross19941994@mail.ee",
+    from: process.env.EMAIL,
     to: recipient,
     subject: "Уведомление о резерве мастера",
     text: "This message was sent from Node js server.",
@@ -57,10 +78,14 @@ class ReservationController {
   }
 
   async create(req, res, next) {
-    let { day, size, hours, master_id, towns_id, clientId } = req.body;
+    let { day, size, master_id, towns_id, clientId } = req.body;
     try {
       let createdAt = Date.now();
       let updatedAt = Date.now();
+
+      let hours = `${timestampToDate(day).time}:00-${
+        timestampToDate(day).time + timeSize[size]
+      }:00`;
 
       const reservation = await Reservation.create({
         day,
@@ -92,7 +117,9 @@ class ReservationController {
 
   //Расчет подходящих мастеров
   async availableMasters(req, res, next) {
-    return res.json(finaleMasters);
+    console.log(req.body);
+
+    //return res.json(finaleMasters);
   }
 
   async makeOrder(req, res, next) {
