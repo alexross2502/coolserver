@@ -14,8 +14,8 @@ module.exports = {
       },
       name: { type: DataTypes.STRING, unique: true, allowNull: false },
       masterId: { type: DataTypes.STRING },
-      createdAt: { type: DataTypes.CHAR(30) },
-      updatedAt: { type: DataTypes.CHAR(30) },
+      createdAt: { type: DataTypes.DATE(6) },
+      updatedAt: { type: DataTypes.DATE(6) },
     });
   },
 

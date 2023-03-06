@@ -16,8 +16,8 @@ module.exports = {
       size: { type: DataTypes.CHAR(30), allowNull: false },
       hours: { type: DataTypes.CHAR(30), allowNull: false },
       startTime: { type: DataTypes.INTEGER, allowNull: false },
-      createdAt: { type: DataTypes.CHAR(30) },
-      updatedAt: { type: DataTypes.CHAR(30) },
+      createdAt: { type: DataTypes.DATE(6) },
+      updatedAt: { type: DataTypes.DATE(6) },
     });
   },
 
