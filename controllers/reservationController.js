@@ -3,6 +3,7 @@ const ApiError = require("../error/ApiError");
 const nodemailer = require("nodemailer");
 const Validator = require("../middleware/validator");
 const db = require("../models/index");
+const { fn, literal } = require("sequelize");
 
 ////// Настройки для размера часов
 let timeSize = {
@@ -84,14 +85,21 @@ class ReservationController {
 
   async create(req, res, next) {
     let { day, size, master_id, towns_id, clientId } = req.body;
+    //day = UTC_TIMESTAMP(day);
+
     try {
       let createdAt = Date.now();
       let updatedAt = Date.now();
 
-      let hours = `${timestampToDate(day).time}:00-${
-        timestampToDate(day).time + timeSize[size]
-      }:00`;
+      // let hours = `${timestampToDate(day).time}:00-${
+      //   timestampToDate(day).time + timeSize[size]
+      // }:00`;
+      //day = "1970-01-20 10:08:06";
+      //console.log(day);
+      //console.log("dasdasdas");
 
+      let hours = "12-13";
+      //console.log(day1, size, day);
       const reservation = await Reservation.create({
         day,
         size,
@@ -104,6 +112,7 @@ class ReservationController {
       });
       return res.status(200).json(reservation).end();
     } catch (e) {
+      console.log(e);
       return res.status(403).json({ message: "error" }).end();
     }
   }
