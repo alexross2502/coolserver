@@ -49,8 +49,8 @@ class ReservationController {
       attributes: [
         "id",
         "day",
+        "end",
         "size",
-        "hours",
         "master_id",
         "towns_id",
         "clientId",
@@ -76,13 +76,16 @@ class ReservationController {
       let createdAt = Date.now();
       let updatedAt = Date.now();
       let d = new Date(+day);
-      let hours = `${d.getHours()}-${d.getHours() + timeSize[size]}`;
+      let end = new Date(+day + timeSize[size] * 3600 * 1000).toString(
+        "en-US",
+        { hours12: false }
+      );
       day = d.toString("en-US", { hours12: false });
 
       const reservation = await Reservation.create({
         day,
+        end,
         size,
-        hours,
         master_id,
         towns_id,
         clientId,
