@@ -18,6 +18,7 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   reservationController.destroy
 );
+/*
 router.get(
   "/:id",
   passport.authenticate("jwt", { session: false }),
@@ -25,5 +26,5 @@ router.get(
 );
 router.post("/order", reservationController.makeOrder);
 router.post("/available", reservationController.availableMasters);
-
+*/
 module.exports = router;
