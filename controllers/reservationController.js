@@ -11,20 +11,6 @@ let timeSize = {
   medium: 3,
   large: 5,
 };
-
-//// Перевод timestamp в обычный вид
-function timestampToDate(timestamp) {
-  var d = new Date(timestamp);
-  return {
-    date:
-      ("0" + d.getDate()).slice(-2) +
-      "." +
-      ("0" + d.getMonth()).slice(-2) +
-      "." +
-      d.getFullYear(),
-    time: d.getHours(),
-  };
-}
 /*
 ////Отправка письма
 async function sendMail(recipient, name, surname, rating) {
@@ -85,21 +71,14 @@ class ReservationController {
 
   async create(req, res, next) {
     let { day, size, master_id, towns_id, clientId } = req.body;
-    //day = UTC_TIMESTAMP(day);
 
     try {
       let createdAt = Date.now();
       let updatedAt = Date.now();
+      let d = new Date(+day);
+      let hours = `${d.getHours()}-${d.getHours() + timeSize[size]}`;
+      day = d.toString("en-US", { hours12: false });
 
-      // let hours = `${timestampToDate(day).time}:00-${
-      //   timestampToDate(day).time + timeSize[size]
-      // }:00`;
-      //day = "1970-01-20 10:08:06";
-      //console.log(day);
-      //console.log("dasdasdas");
-
-      let hours = "12-13";
-      //console.log(day1, size, day);
       const reservation = await Reservation.create({
         day,
         size,
