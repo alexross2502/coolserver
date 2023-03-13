@@ -25,6 +25,7 @@ router.get(
   reservationController.getAvailable
 );
 router.post("/order", reservationController.makeOrder);
-router.post("/available", reservationController.availableMasters);
 */
+router.post("/available", reservationController.availableMasters);
+
 module.exports = router;

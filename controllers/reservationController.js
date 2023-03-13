@@ -3,6 +3,7 @@ const ApiError = require("../error/ApiError");
 const nodemailer = require("nodemailer");
 const Validator = require("../middleware/validator");
 const db = require("../models/index");
+const { Op } = require("sequelize");
 
 ////// Настройки для размера часов
 let timeSize = {
@@ -96,26 +97,83 @@ class ReservationController {
       return res.status(403).json({ message: "error" }).end();
     }
   }
-  /*
-  async getAvailable(req, res, next) {
-    try {
-      const { id } = req.params;
-      let availability = await Reservation.findAll({
-        where: { towns_id: id },
-      });
-      return res.json(availability);
-    } catch (e) {
-      next(ApiError.badRequest(e.message));
-    }
-  }*/
-  /*
+
   //Расчет подходящих мастеров
   async availableMasters(req, res, next) {
-    console.log(req.body);
+    let { day, size, towns_id } = req.body;
+    let start = new Date(+day).toString("en-US", { hours12: false });
+    let end = new Date(+day + timeSize[size] * 3600 * 1000).toString("en-US", {
+      hours12: false,
+    });
 
-    //return res.json(finaleMasters);
+    try {
+      let notAvailable = await Reservation.findAll({
+        where: {
+          towns_id: towns_id,
+          [Op.or]: [
+            {
+              ////////////////
+              [Op.and]: {
+                day: {
+                  [Op.lt]: end,
+                },
+                end: {
+                  [Op.or]: {
+                    [Op.gt]: end,
+                    [Op.eq]: end,
+                  },
+                },
+              },
+              ////////////////////
+              [Op.and]: {
+                day: {
+                  [Op.or]: {
+                    [Op.lt]: start,
+                    [Op.eq]: start,
+                  },
+                },
+                end: {
+                  [Op.gt]: start,
+                },
+              },
+              //////////////////
+              [Op.and]: {
+                day: {
+                  [Op.or]: {
+                    [Op.gt]: start,
+                    [Op.eq]: start,
+                  },
+                },
+                end: {
+                  [Op.or]: {
+                    [Op.lt]: end,
+                    [Op.eq]: end,
+                  },
+                },
+              },
+              ///////////////////
+            },
+          ],
+        },
+      });
+      let masters = [];
+      notAvailable.forEach((el) => {
+        masters.push(`${el.master_id}`);
+      });
+      let available = await Masters.findAll({
+        where: {
+          townId: towns_id,
+          id: {
+            [Op.not]: masters,
+          },
+        },
+      });
+
+      return res.status(200).json(available).end();
+    } catch (e) {
+      return res.status(403).json({ message: "error" }).end();
+    }
   }
-*/
   /*
   async makeOrder(req, res, next) {
     const {
