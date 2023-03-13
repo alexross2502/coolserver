@@ -3,7 +3,6 @@ const ApiError = require("../error/ApiError");
 const nodemailer = require("nodemailer");
 const Validator = require("../middleware/validator");
 const db = require("../models/index");
-const { fn, literal } = require("sequelize");
 
 ////// Настройки для размера часов
 let timeSize = {
@@ -94,7 +93,6 @@ class ReservationController {
       });
       return res.status(200).json(reservation).end();
     } catch (e) {
-      console.log(e);
       return res.status(403).json({ message: "error" }).end();
     }
   }
