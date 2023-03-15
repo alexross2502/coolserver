@@ -75,11 +75,8 @@ class ReservationController {
       let createdAt = Date.now();
       let updatedAt = Date.now();
       let d = new Date(+day);
-      let end = new Date(+day + timeSize[size] * 3600 * 1000).toString(
-        "en-US",
-        { hours12: false }
-      );
-      day = d.toString("en-US", { hours12: false });
+      let end = new Date(+day + timeSize[size] * 3600 * 1000);
+      day = d;
 
       const reservation = await Reservation.create({
         day,
