@@ -92,7 +92,7 @@ class ReservationController {
       });
       return res.status(200).json(reservation).end();
     } catch (e) {
-      return res.status(403).json({ message: "error" }).end();
+      return res.status(400).json({ message: "error" }).end();
     }
   }
 
@@ -105,7 +105,7 @@ class ReservationController {
     try {
       let notAvailable = await Reservation.findAll({
         where: {
-          towns_id: towns_id,
+          towns_id,
           [Op.or]: [
             {
               ////////////////
@@ -114,19 +114,13 @@ class ReservationController {
                   [Op.lt]: end,
                 },
                 end: {
-                  [Op.or]: {
-                    [Op.gt]: end,
-                    [Op.eq]: end,
-                  },
+                  [Op.gte]: end,
                 },
               },
               ////////////////////
               [Op.and]: {
                 day: {
-                  [Op.or]: {
-                    [Op.lt]: start,
-                    [Op.eq]: start,
-                  },
+                  [Op.lte]: start,
                 },
                 end: {
                   [Op.gt]: start,
@@ -135,16 +129,10 @@ class ReservationController {
               //////////////////
               [Op.and]: {
                 day: {
-                  [Op.or]: {
-                    [Op.gt]: start,
-                    [Op.eq]: start,
-                  },
+                  [Op.gte]: start,
                 },
                 end: {
-                  [Op.or]: {
-                    [Op.lt]: end,
-                    [Op.eq]: end,
-                  },
+                  [Op.lte]: end,
                 },
               },
               ///////////////////
@@ -152,22 +140,19 @@ class ReservationController {
           ],
         },
       });
-      let masters = [];
-      notAvailable.forEach((el) => {
-        masters.push(`${el.master_id}`);
-      });
+
       let available = await Masters.findAll({
         where: {
           townId: towns_id,
           id: {
-            [Op.not]: masters,
+            [Op.not]: Array.from(notAvailable, (el) => el.dataValues.master_id),
           },
         },
       });
 
       return res.status(200).json(available).end();
     } catch (e) {
-      return res.status(403).json({ message: "error" }).end();
+      return res.status(400).json({ message: "error" }).end();
     }
   }
   /*

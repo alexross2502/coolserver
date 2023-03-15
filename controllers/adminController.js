@@ -41,7 +41,7 @@ class AdminController {
         return res.status(400).json({ message: "wrong login" }).end();
       }
     } catch (e) {
-      return res.status(403).json({ message: "error" }).end();
+      return res.status(400).json({ message: "error" }).end();
     }
   }
 
@@ -65,13 +65,13 @@ class AdminController {
         if (admin) {
           return res.status(200).json(admin).end();
         } else {
-          return res.status(403).json({ message: "error" }).end();
+          return res.status(400).json({ message: "error" }).end();
         }
       } else {
         return res.status(400).json({ message: "wrong login" }).end();
       }
     } catch (e) {
-      return res.status(403).json({ message: "error" }).end();
+      return res.status(400).json({ message: "error" }).end();
     }
   }
 }
