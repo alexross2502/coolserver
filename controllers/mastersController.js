@@ -28,7 +28,7 @@ class MastersController {
         return res.status(400).json({ message: "wrong data" }).end();
       }
     } catch (e) {
-      return res.status(403).json({ message: "error" }).end();
+      return res.status(400).json({ message: "error" }).end();
     }
   }
 
