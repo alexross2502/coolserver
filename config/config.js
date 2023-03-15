@@ -1,26 +1,18 @@
-{
-  "development": {
-    "username": "heroku_database",
-    "password": "MAKROMINxxx111",
-    "database": "heroku_database",
-    "host": "db4free.net",
-    "dialect": "mysql",
-    "port": "3306"
+require("dotenv").config();
+
+module.exports = {
+  development: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+    host: process.env.DB_HOST,
+    dialect: process.env.DB_DIALECT,
   },
-  "test": {
-    "username": "heroku_database",
-    "password": "MAKROMINxxx111",
-    "database": "heroku_database",
-    "host": "db4free.net",
-    "dialect": "mysql",
-    "port": "3306"
+  production: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+    host: process.env.DB_HOST,
+    dialect: process.env.DB_DIALECT,
   },
-  "production": {
-    "username": "heroku_database",
-    "password": "MAKROMINxxx111",
-    "database": "heroku_database",
-    "host": "db4free.net",
-    "dialect": "mysql",
-    "port": "3306"
-  }
-}
+};
