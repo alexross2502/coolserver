@@ -77,6 +77,7 @@ class ReservationController {
       let updatedAt = Date.now();
       let d = new Date(+day);
       let end = new Date(+day + timeSize[size] * 3600 * 1000);
+
       day = d;
 
       const reservation = await Reservation.create({
@@ -98,10 +99,8 @@ class ReservationController {
   //Расчет подходящих мастеров
   async availableMasters(req, res, next) {
     let { day, size, towns_id } = req.body;
-    let start = new Date(+day).toString("en-US", { hours12: false });
-    let end = new Date(+day + timeSize[size] * 3600 * 1000).toString("en-US", {
-      hours12: false,
-    });
+    let start = new Date(+day);
+    let end = new Date(+day + timeSize[size] * 3600 * 1000);
 
     try {
       let notAvailable = await Reservation.findAll({
