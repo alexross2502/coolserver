@@ -1,7 +1,7 @@
 const { Reservation, Masters, Clients, Towns } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const nodemailer = require("nodemailer");
-const Validator = require("../middleware/validator");
+const { validationResult } = require("express-validator");
 const db = require("../models/index");
 const { Op } = require("sequelize");
 
@@ -73,6 +73,12 @@ class ReservationController {
     let { day, size, master_id, towns_id, clientId } = req.body;
 
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          errors: errors.array(),
+        });
+      }
       let createdAt = Date.now();
       let updatedAt = Date.now();
       let d = new Date(+day);

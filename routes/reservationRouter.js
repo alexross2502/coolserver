@@ -2,6 +2,7 @@ const Router = require("express");
 const router = new Router();
 const reservationController = require("../controllers/reservationController");
 const passport = require("passport");
+const { reservationDataValidator } = require("../middleware/validator");
 
 router.get(
   "/",
@@ -10,7 +11,7 @@ router.get(
 );
 router.post(
   "/",
-  passport.authenticate("jwt", { session: false }),
+  [passport.authenticate("jwt", { session: false }), reservationDataValidator],
   reservationController.create
 );
 router.delete(

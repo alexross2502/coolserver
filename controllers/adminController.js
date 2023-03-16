@@ -1,7 +1,7 @@
 const { Admin } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const jwt = require("jsonwebtoken");
-const Validator = require("../middleware/validator");
+const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 
 class AdminController {
@@ -46,6 +46,12 @@ class AdminController {
   }
 
   async create(req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    }
     let { email, password } = req.body;
     let availability = await Admin.findOne({
       where: { email: email },

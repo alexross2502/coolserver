@@ -1,21 +1,24 @@
 const { Towns } = require("../models/models");
 const ApiError = require("../error/ApiError");
-const Validator = require("../middleware/validator");
+const { validationResult } = require("express-validator");
 
 class TownsController {
   async create(req, res, next) {
     try {
-      const { name } = req.body;
-      if (Validator.checkName(name)) {
-        let createdAt = Date.now();
-        let updatedAt = Date.now();
-        const town = await Towns.create({
-          name: name,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          errors: errors.array(),
         });
-        return res.status(200).json(town).end();
-      } else {
-        return res.status(400).json({ message: "wrong data" }).end();
       }
+      const { name } = req.body;
+
+      let createdAt = Date.now();
+      let updatedAt = Date.now();
+      const town = await Towns.create({
+        name: name,
+      });
+      return res.status(200).json(town).end();
     } catch (e) {
       return res.status(400).json({ message: "error" }).end();
     }

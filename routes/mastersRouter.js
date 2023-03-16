@@ -2,10 +2,11 @@ const Router = require("express");
 const router = new Router();
 const mastersController = require("../controllers/mastersController");
 const passport = require("passport");
+const { masterDataValidate } = require("../middleware/validator");
 
 router.post(
   "/",
-  passport.authenticate("jwt", { session: false }),
+  [passport.authenticate("jwt", { session: false }), masterDataValidate],
   mastersController.create
 );
 router.get(
