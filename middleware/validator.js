@@ -1,152 +1,105 @@
-const { Masters } = require("../models/Masters");
-const { Reservation } = require("../models/Reservation");
-const { Towns } = require("../models/Towns");
+const { body, param } = require("express-validator");
 
-const Validator = {};
+const clientDataValidate = [
+  body("name")
+    .exists()
+    .withMessage("Name required")
+    .isString()
+    .withMessage("Name must be a string")
+    .isLength({ min: 3 })
+    .withMessage("Name must be at least 3 characters long"),
+  body("email")
+    .exists()
+    .withMessage("Email required")
+    .isString()
+    .withMessage("Email must be a string")
+    .isEmail()
+    .withMessage("Email wrong format"),
+];
 
-Validator.checkName = function nameCheck(el) {
-  const regexName = /^[а-яА-я]+$/;
+const adminDataValidate = [
+  body("login")
+    .exists()
+    .withMessage("Login required")
+    .isString()
+    .withMessage("Login must be a string")
+    .isEmail()
+    .withMessage("Login wrong format"),
+  body("password")
+    .exists()
+    .withMessage("Password required")
+    .isString()
+    .withMessage("Password must be a string")
+    .isLength({ min: 5 })
+    .withMessage("Password must be at least 5 characters long"),
+];
 
-  if (regexName.test(el)) {
-    return true;
-  } else {
-    return false;
-  }
+const masterDataValidate = [
+  body("name")
+    .exists()
+    .withMessage("Name required")
+    .isString()
+    .withMessage("Name must be a string")
+    .isLength({ min: 3 })
+    .withMessage("Name must be at least 3 characters long"),
+  body("surname")
+    .exists()
+    .withMessage("Surname required")
+    .isString()
+    .withMessage("Surname must be a string")
+    .isLength({ min: 3 })
+    .withMessage("Surname must be at least 3 characters long"),
+  body("rating")
+    .exists()
+    .withMessage("Rating required")
+    .isNumeric()
+    .withMessage("Rating must be a number")
+    .isInt({ min: 1, max: 5 })
+    .withMessage("Master rating must be in range 1-5"),
+  body("townId")
+    .exists()
+    .withMessage("Town required")
+    .isString()
+    .withMessage("Town must be a string"),
+];
+
+const townDataValidator = [
+  body("name")
+    .exists()
+    .withMessage("Name required")
+    .isString()
+    .withMessage("Name must be a string")
+    .isLength({ min: 3 })
+    .withMessage("Name must be at least 3 characters long"),
+];
+
+const reservationDataValidator = [
+  body("day")
+    .exists()
+    .withMessage("Day required")
+    .isNumeric()
+    .withMessage("Day must be a number")
+    .custom((date, { req }) => {
+      const now = Date.now();
+      if (date < now) throw new Error("Order for the past is prohibited");
+      return true;
+    }),
+  body("size")
+    .exists()
+    .withMessage("Size required")
+    .isString()
+    .withMessage("Size must be a string")
+    .isIn(["small", "medium", "large"])
+    .withMessage("Unknown size"),
+  body("master_id").exists().withMessage("master_id required"),
+  body("towns_id").exists().withMessage("towns_id required"),
+  body("clientId").exists().withMessage("clientId required"),
+];
+
+module.exports = {
+  clientDataValidate,
+  adminDataValidate,
+  masterDataValidate,
+  townDataValidator,
+  reservationDataValidator,
 };
-
-Validator.checkEmail = function emailCheck(el) {
-  const regexEmail =
-    /^([a-z0-9_-]+.)*[a-z0-9_-]+@[a-z0-9_-]+(.[a-z0-9_-]+)*.[a-z]{2,6}$/;
-
-  if (regexEmail.test(el)) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-Validator.checkRating = function ratingCheck(el) {
-  if (el >= 1 && el <= 5) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-Validator.dateChecker = function checkerDate(day, hours) {
-  let d = new Date();
-  let currentDay = String(d.getDate());
-  let currentMonth = String(+d.getMonth() + 1);
-  let currentYear = String(d.getFullYear());
-  let currenthour = String(d.getHours())
-  let currentTimestamp = Validator.dateConverter(currentDay, currentMonth, currentYear, currenthour)
-  let date = day.split('.')
-console.log(currentTimestamp, 'currentTimestamp')
-
-  if (date[0][0] == 0) date[0] = date[0][1]
-  if(Validator.dateConverter(date[0], date[1], date[2], hours.split('-')[0]) > +currentTimestamp) {
-    return true
-  }else {
-    return false
-  }
-}
-
-Validator.dateConverter = function converterData(day, month, year, hour) {
-  if (Number(day)[0] == 0) Number(day) = Number(day)[1]
-  console.log(year * 8760 + month * 730 + day * 24 + hour, 'necurrent')
-   return (+year * 8760 + +month * 730 + +day * 24 + +hour)
- }
-
-Validator.hoursChecker = function checkerHours(hours) {
-
-  if(hours.split('-').length > 3 || (hours.split('-')[0] != +hours.split('-')[hours.split('-').length - 1] - Number((hours.split('-').length - 1)))) {
-    return false
-  } else {
-    hours = hours.split('-')[0]
-    if(hours >= 9 && hours <= 19) {
-      return true
-    } else {
-      return false
-    }
-  }
-  
-}
-
-Validator.checkTownForMaster = async function checkTownForMaster (townName) {
-  let town = await Towns.findOne({
-    where: { name: townName },
-  });
-  if(town != null) {
-    return true
-  } else {
-    return false
-  }
-}
-
-Validator.checkCreateReservation = async function checkCreateReservation (master_id, towns_id) {
-  let master = await Masters.findOne({
-    where: { id: master_id },
-  });
-  if(master != null) {
-    let town = await Towns.findOne({
-      where: { id: towns_id, name: master.dataValues.townName },
-    });
-    if(town != null) {
-      return true
-    } else {
-      return false
-    }
-  } else {
-    return false
-  }
-  
-}
-
-Validator.dateRange = function dateRange (date) {
-  date = date.split('.').reverse()
-  if(isNaN(+date[0]) || isNaN(+date[1]) || isNaN(+date[2])) {
-    return false
-  }
-  date = date.join('-')
-  const d = new Date(date);
-  if(d != 'Invalid Date' && +date.split('-')[0] > 2020){
-    return true
-  } else {
-    return false
-  }
-}
-
-function checkInterval(reservationStart, reservationEnd, timeStart, timeEnd) {
-
-  if (
-    timeEnd > reservationStart && timeEnd <= reservationEnd ||
-    timeStart >= reservationStart && timeStart < reservationEnd ||
-    timeStart <= reservationStart && timeEnd >= reservationEnd
-  ) {
-    return false;
-  } else {
-    return true;
-  }
-}
-
-Validator.sameTime = async function sameTime (day, hours, master_id) {
-  let reservation = await Reservation.findAll({
-    where: { master_id: master_id, day: day },
-  });
-  let availability = true;
-  hours = hours.split('-')
-  let timeStart = +hours[0]
-  let timeEnd = +hours[hours.length - 1] + 1
-  reservation.forEach((el) => {
-    time = el.dataValues.hours.split('-')
-    let reservationStart = +time[0]
-    let reservationEnd = +time[time.length - 1] + 1
-   if(checkInterval(reservationStart, reservationEnd, timeStart, timeEnd) == false) {
-    availability = false
-   }
-  })
-  return availability
-}
-
-
-module.exports = Validator;
