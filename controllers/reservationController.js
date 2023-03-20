@@ -36,15 +36,15 @@ async function sendMail(recipient, name, surname, rating) {
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
-  let existence = await Clients.findOne({
+  const [client, created] = await Clients.findOrCreate({
     where: { email: email },
+    defaults: {
+      name: name,
+      email: email,
+    },
   });
-  if (existence == null) {
-    const client = await Clients.create({ name, email });
-    return client.dataValues.id;
-  } else {
-    return existence.dataValues.id;
-  }
+
+  return client.dataValues.id;
 }
 
 class ReservationController {
