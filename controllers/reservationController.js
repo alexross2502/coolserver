@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 const { validationResult } = require("express-validator");
 const db = require("../models/index");
 const { Op } = require("sequelize");
+const { reservationDuplication } = require("../utils/reservationDuplication");
 
 ////// Настройки для размера часов
 let timeSize = {
@@ -11,19 +12,19 @@ let timeSize = {
   medium: 3,
   large: 5,
 };
-/*
+
 ////Отправка письма
 async function sendMail(recipient, name, surname, rating) {
   let transporter = nodemailer.createTransport({
     host: process.env.POST_HOST,
     auth: {
-      user: process.env.EMAIL,
-      pass: process.env.PASSWORD,
+      user: process.env.POST_EMAIL,
+      pass: process.env.POST_PASSWORD,
     },
   });
 
   let result = await transporter.sendMail({
-    from: process.env.EMAIL,
+    from: process.env.POST_EMAIL,
     to: recipient,
     subject: "Уведомление о резерве мастера",
     text: "This message was sent from Node js server.",
@@ -31,17 +32,20 @@ async function sendMail(recipient, name, surname, rating) {
     Вы успешно заказали мастера ${name} ${surname} с рейтингом ${rating} 
     `,
   });
-}*/
-/*
+}
+
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
-  let existence = await Clients.findOne({
+  const [client, created] = await Clients.findOrCreate({
     where: { email: email },
+    defaults: {
+      name: name,
+      email: email,
+    },
   });
-  if (existence == null) {
-    const client = await Clients.create({ name, email });
-  }
-}*/
+
+  return client.dataValues.id;
+}
 
 class ReservationController {
   async getAll(req, res) {
@@ -81,22 +85,30 @@ class ReservationController {
       }
       let createdAt = Date.now();
       let updatedAt = Date.now();
-      let d = new Date(+day);
+      let start = new Date(+day);
       let end = new Date(+day + timeSize[size] * 3600 * 1000);
+      day = new Date(+day);
 
-      day = d;
-
-      const reservation = await Reservation.create({
-        day,
-        end,
-        size,
-        master_id,
-        towns_id,
-        clientId,
-        createdAt,
-        updatedAt,
-      });
-      return res.status(200).json(reservation).end();
+      if (
+        (await reservationDuplication(towns_id, master_id, start, end)) === 0
+      ) {
+        const reservation = await Reservation.create({
+          day,
+          end,
+          size,
+          master_id,
+          towns_id,
+          clientId,
+          createdAt,
+          updatedAt,
+        });
+        return res.status(200).json(reservation).end();
+      } else {
+        return res
+          .status(400)
+          .json({ message: "the master is busy at this time" })
+          .end();
+      }
     } catch (e) {
       return res.status(400).json({ message: "error" }).end();
     }
@@ -123,7 +135,9 @@ class ReservationController {
                   [Op.gte]: end,
                 },
               },
-              ////////////////////
+            },
+            ////////////////////
+            {
               [Op.and]: {
                 day: {
                   [Op.lte]: start,
@@ -132,7 +146,9 @@ class ReservationController {
                   [Op.gt]: start,
                 },
               },
-              //////////////////
+            },
+            //////////////////
+            {
               [Op.and]: {
                 day: {
                   [Op.gte]: start,
@@ -161,11 +177,12 @@ class ReservationController {
       return res.status(400).json({ message: "error" }).end();
     }
   }
-  /*
+
+  ////Создание клиентского резерва
   async makeOrder(req, res, next) {
-    const {
+    let {
       day,
-      hours,
+      size,
       master_id,
       towns_id,
       recipient,
@@ -175,40 +192,42 @@ class ReservationController {
       clientName,
     } = req.body;
 
-    if (
-      Validator.dateChecker(day, hours) &&
-      Validator.hoursChecker(hours) &&
-      Validator.checkCreateReservation(master_id, towns_id) &&
-      Validator.checkEmail(recipient) &&
-      Validator.checkName(name) &&
-      Validator.checkName(surname) &&
-      Validator.checkName(clientName) &&
-      Validator.checkRating(rating) &&
-      Validator.dateRange(day) &&
-      (await Validator.sameTime(day, hours, master_id))
-    ) {
-      try {
-        let createdAt = Date.now();
-        let updatedAt = Date.now();
+    //Создание нового клиента или получения id уже существующего
+    let clientId = await check(clientName, recipient);
+
+    try {
+      let createdAt = Date.now();
+      let updatedAt = Date.now();
+      let start = new Date(+day);
+      let end = new Date(+day + timeSize[size] * 3600 * 1000);
+      day = new Date(+day);
+      if (
+        (await reservationDuplication(towns_id, master_id, start, end)) === 0
+      ) {
         const reservation = await Reservation.create({
           day,
-          hours,
+          end,
+          size,
           master_id,
           towns_id,
+          clientId,
           createdAt,
           updatedAt,
         });
-
         //Отправка письма
         sendMail(recipient, name, surname, rating);
-        //Создание нового клиента
-        check(clientName, recipient);
-        return res.json(reservation);
-      } catch (e) {
-        next(ApiError.badRequest(e.message));
+        return res.status(200).json(reservation).end();
+      } else {
+        return res
+          .status(400)
+          .json({ message: "the master is busy at this time" })
+          .end();
       }
-    } else return res.json("Неверные данные");
-  }*/
+    } catch (e) {
+      console.log(e);
+      return res.status(400).json({ message: "error" }).end();
+    }
+  }
 }
 
 module.exports = new ReservationController();

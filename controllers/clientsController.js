@@ -23,7 +23,6 @@ class ClientsController {
 
       return res.status(200).json(client).end();
     } catch (e) {
-      console.log(e);
       return res.status(400).json({ message: "error" }).end();
     }
   }
