@@ -20,5 +20,5 @@ let sequelize = new Sequelize(
     },
   }
 );
-
+//console.log(sequelize);
 export default sequelize;

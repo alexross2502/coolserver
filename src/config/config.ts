@@ -18,5 +18,5 @@ const dbCredentials = {
     dialect: process.env.DB_DIALECT as Dialect,
   },
 };
-
+//console.log(process.env);
 export default dbCredentials;

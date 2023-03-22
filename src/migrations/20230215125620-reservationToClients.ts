@@ -1,15 +1,15 @@
 "use strict";
 
-const { DataTypes, QueryInterface, Sequelize } = require("sequelize");
+import { DataTypes, QueryInterface, Sequelize } from "sequelize";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (QueryInterface, Sequelize) => {
-    await QueryInterface.addColumn("reservations", "towns_id", {
+    await QueryInterface.addColumn("reservations", "clientId", {
       type: DataTypes.CHAR(36).BINARY,
       references: {
         model: {
-          tableName: "towns",
+          tableName: "clients",
         },
         key: "id",
       },
@@ -17,6 +17,6 @@ module.exports = {
   },
 
   down: async (QueryInterface, Sequelize) => {
-    await QueryInterface.removeColumn("reservations", "towns_id");
+    await QueryInterface.removeColumn("reservations", "clientId");
   },
 };
