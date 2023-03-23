@@ -1,37 +1,10 @@
 import { Reservation, Masters, Clients } from "../models/models";
-import * as nodemailer from "nodemailer";
 import * as expressValidator from "express-validator";
 const { Op } = require("sequelize");
 const { reservationDuplication } = require("../utils/reservationDuplication");
 import * as express from "express";
-
-////// Настройки для размера часов
-let timeSize = {
-  small: 1,
-  medium: 3,
-  large: 5,
-};
-
-////Отправка письма
-async function sendMail(recipient, name, surname, rating) {
-  let transporter = nodemailer.createTransport({
-    host: process.env.POST_HOST,
-    auth: {
-      user: process.env.POST_EMAIL,
-      pass: process.env.POST_PASSWORD,
-    },
-  });
-
-  let result = await transporter.sendMail({
-    from: process.env.POST_EMAIL,
-    to: recipient,
-    subject: "Уведомление о резерве мастера",
-    text: "This message was sent from Node js server.",
-    html: `
-    Вы успешно заказали мастера ${name} ${surname} с рейтингом ${rating} 
-    `,
-  });
-}
+import * as constants from "../utils/constants";
+import { sendMail } from "../utils/sendMail";
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
@@ -77,14 +50,12 @@ export async function create(req: express.Request, res: express.Response) {
   try {
     const errors = expressValidator.validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
+      throw new Error("Validator's error");
     }
     let createdAt = Date.now();
     let updatedAt = Date.now();
     let start = new Date(+day);
-    let end = new Date(+day + timeSize[size] * 3600 * 1000);
+    let end = new Date(+day + constants.timeSize[size] * 3600 * 1000);
     day = new Date(+day);
 
     if ((await reservationDuplication(towns_id, master_id, start, end)) === 0) {
@@ -100,10 +71,7 @@ export async function create(req: express.Request, res: express.Response) {
       });
       return res.status(200).json(reservation).end();
     } else {
-      return res
-        .status(400)
-        .json({ message: "the master is busy at this time" })
-        .end();
+      throw new Error("Duplication's error");
     }
   } catch (e) {
     return res.status(400).json({ message: "error" }).end();
@@ -117,7 +85,7 @@ export async function availableMasters(
 ) {
   let { day, size, towns_id } = req.body;
   let start = new Date(+day);
-  let end = new Date(+day + timeSize[size] * 3600 * 1000);
+  let end = new Date(+day + constants.timeSize[size] * 3600 * 1000);
 
   try {
     let notAvailable = await Reservation.findAll({
@@ -198,7 +166,7 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     let createdAt = Date.now();
     let updatedAt = Date.now();
     let start = new Date(+day);
-    let end = new Date(+day + timeSize[size] * 3600 * 1000);
+    let end = new Date(+day + constants.timeSize[size] * 3600 * 1000);
     day = new Date(+day);
     if ((await reservationDuplication(towns_id, master_id, start, end)) === 0) {
       const reservation = await Reservation.create({
@@ -215,13 +183,9 @@ export async function makeOrder(req: express.Request, res: express.Response) {
       sendMail(recipient, name, surname, rating);
       return res.status(200).json(reservation).end();
     } else {
-      return res
-        .status(400)
-        .json({ message: "the master is busy at this time" })
-        .end();
+      throw new Error("error");
     }
   } catch (e) {
-    console.log(e);
     return res.status(400).json({ message: "error" }).end();
   }
 }

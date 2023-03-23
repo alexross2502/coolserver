@@ -1,8 +1,5 @@
 "use strict";
-/*
-//const fs = require("fs");
-//const path = require("path");
-//import * as Sequelize from "sequelize"
+
 import { Sequelize } from "sequelize";
 import sequelize from "../db";
 
@@ -23,4 +20,3 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 module.exports = db;
-*/

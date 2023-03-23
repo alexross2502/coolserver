@@ -6,9 +6,7 @@ export async function create(req: express.Request, res: express.Response) {
   try {
     const errors = expressValidator.validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
+      throw new Error("Validator's error");
     }
     const { name, email } = req.body;
     let createdAt = Date.now();
@@ -38,7 +36,7 @@ export async function destroy(req: express.Request, res: express.Response) {
     if (client) {
       return res.status(200).json(client).end();
     } else {
-      return res.status(400).json({ message: "wrong data" }).end();
+      throw new Error("error");
     }
   } catch (e) {
     return res.status(400).json({ message: "error" }).end();

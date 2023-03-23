@@ -6,9 +6,7 @@ export async function create(req: express.Request, res: express.Response) {
   try {
     const errors = expressValidator.validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-      });
+      throw new Error("Validator's error");
     }
     const { name } = req.body;
 

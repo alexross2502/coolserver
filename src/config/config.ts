@@ -17,6 +17,19 @@ const dbCredentials = {
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT as Dialect,
   },
+  options: {
+    dialect: "mysql",
+    host: process.env.DB_HOST,
+    port: 3306,
+  },
+  ssl: {
+    ssl: true,
+    extra: {
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    },
+  },
 };
-//console.log(process.env);
+
 export default dbCredentials;

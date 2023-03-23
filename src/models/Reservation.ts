@@ -6,9 +6,9 @@ export class Reservation extends Model {
   public day!: Date;
   public size!: string;
   public end!: Date;
-  public master_id!: typeof DataTypes.UUID;
-  public towns_id!: typeof DataTypes.UUID;
-  public clientId!: typeof DataTypes.UUID;
+  public master_id?: typeof DataTypes.UUID;
+  public towns_id?: typeof DataTypes.UUID;
+  public clientId?: typeof DataTypes.UUID;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;

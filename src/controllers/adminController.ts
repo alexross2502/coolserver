@@ -1,43 +1,21 @@
 import { Admin } from "../models/models";
-const jwt = require("jsonwebtoken");
 import * as expressValidator from "express-validator";
 const bcrypt = require("bcrypt");
 import * as express from "express";
+import { auth } from "../utils/auth";
 
 export async function check(req: express.Request, res: express.Response) {
   try {
     let { login, password } = req.body;
-    let token = "secret";
     let availability = await Admin.findOne({
       where: { email: login },
     });
     if (!!availability) {
-      bcrypt.compare(
-        password,
-        availability.dataValues.password,
-        (err, result) => {
-          if (result) {
-            token = jwt.sign(
-              {
-                login: login,
-              },
-              "dev-jwt",
-              { expiresIn: 60 * 60 * 3 }
-            );
-            return res
-              .status(200)
-              .json({
-                availability: true,
-                token: `Bearer ${token}`,
-              })
-              .end();
-          } else {
-            return res.status(400).json({ message: "wrong password" }).end();
-          }
-        }
-      );
+      auth
+        .login(login, password, availability.dataValues.password)
+        .then((result) => res.status(200).json(result).end());
     } else {
-      return res.status(400).json({ message: "wrong login" }).end();
+      throw new Error("error");
     }
   } catch (e) {
     return res.status(400).json({ message: e }).end();
@@ -47,9 +25,7 @@ export async function check(req: express.Request, res: express.Response) {
 export async function create(req: express.Request, res: express.Response) {
   const errors = expressValidator.validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      errors: errors.array(),
-    });
+    throw new Error("Validator's error");
   }
   let { email, password } = req.body;
   let availability = await Admin.findOne({
@@ -70,10 +46,10 @@ export async function create(req: express.Request, res: express.Response) {
       if (admin) {
         return res.status(200).json(admin).end();
       } else {
-        return res.status(400).json({ message: "error" }).end();
+        throw new Error("error");
       }
     } else {
-      return res.status(400).json({ message: "wrong login" }).end();
+      throw new Error("error");
     }
   } catch (e) {
     return res.status(400).json({ message: "error" }).end();

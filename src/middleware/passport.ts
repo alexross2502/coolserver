@@ -7,28 +7,22 @@ const options = {
   secretOrKey: "dev-jwt",
 };
 
-module.exports = (passport: { use: (arg0: any) => void }) => {
+module.exports = (passport) => {
   passport.use(
-    new JwtStrategy(
-      options,
-      async (
-        payload: { login: any },
-        done: (arg0: any, arg1: boolean | Admin) => void
-      ) => {
-        try {
-          const user = await Admin.findOne({
-            where: { email: payload.login },
-          });
+    new JwtStrategy(options, async (payload, done) => {
+      try {
+        const user = await Admin.findOne({
+          where: { email: payload.login },
+        });
 
-          if (user) {
-            done(null, user);
-          } else {
-            done(null, false);
-          }
-        } catch (e) {
-          console.log(e);
+        if (user) {
+          done(null, user);
+        } else {
+          done(null, false);
         }
+      } catch (e) {
+        console.log(e);
       }
-    )
+    })
   );
 };

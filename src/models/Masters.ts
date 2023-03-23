@@ -6,7 +6,7 @@ export class Masters extends Model {
   public name!: string;
   public surname!: string;
   public rating!: number;
-  public townId!: typeof DataTypes.UUID;
+  public townId?: typeof DataTypes.UUID;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
