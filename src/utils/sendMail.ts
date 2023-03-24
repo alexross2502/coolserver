@@ -1,17 +1,14 @@
 import * as nodemailer from "nodemailer";
+import { transporterCredentials } from "./constants";
 
 ////Отправка письма
 export async function sendMail(recipient, name, surname, rating) {
   let transporter = nodemailer.createTransport({
-    host: process.env.POST_HOST,
-    auth: {
-      user: process.env.POST_EMAIL,
-      pass: process.env.POST_PASSWORD,
-    },
+    ...transporterCredentials,
   });
 
   let result = await transporter.sendMail({
-    from: process.env.POST_EMAIL,
+    from: transporterCredentials.auth.user,
     to: recipient,
     subject: "Уведомление о резерве мастера",
     text: "This message was sent from Node js server.",
