@@ -11,12 +11,12 @@ export async function check(req: express.Request, res: express.Response) {
       where: { email: login },
     });
     if (!!availability) {
-      res
-        .status(200)
-        .json(
-          await auth.login(login, password, availability.dataValues.password)
-        )
-        .end();
+      const authTokens = await auth.login(
+        login,
+        password,
+        availability.dataValues.password
+      );
+      res.status(200).json(authTokens).end();
     } else {
       throw new Error("error");
     }
