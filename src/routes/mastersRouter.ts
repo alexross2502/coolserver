@@ -19,11 +19,10 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   mastersController.destroy
 );
-/*
 router.get(
   "/:name",
   passport.authenticate("jwt", { session: false }),
   mastersController.getAvailable
 );
-*/
+
 module.exports = router;
