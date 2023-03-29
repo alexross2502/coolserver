@@ -18,7 +18,7 @@ export const clientDataValidate = [
 ];
 
 export const adminDataValidate = [
-  body("login")
+  body("email")
     .exists()
     .withMessage("Login required")
     .isString()

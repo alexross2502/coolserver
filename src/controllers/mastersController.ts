@@ -8,7 +8,7 @@ export async function create(req: express.Request, res: express.Response) {
     if (!errors.isEmpty()) {
       throw new Error("Validator's error");
     }
-    const { name, surname, rating, townId } = req.body;
+    const { name, surname, rating, townId,  } = req.body;
 
     let createdAt = Date.now();
     let updatedAt = Date.now();

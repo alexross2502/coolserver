@@ -4,8 +4,7 @@ import * as cors from "cors";
 import * as passport from "passport";
 import sequelize from "./db";
 import router from "./routes/index";
-import dbCredentials from "./config/config";
-console.log(dbCredentials);
+
 dotenv.config();
 
 const app: express.Express = express();

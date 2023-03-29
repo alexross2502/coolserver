@@ -1,6 +1,7 @@
 import { Clients } from "../models/models";
 import * as expressValidator from "express-validator";
 import * as express from "express";
+import { passwordHash } from "../utils/passwordHash";
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -38,6 +39,30 @@ export async function destroy(req: express.Request, res: express.Response) {
     } else {
       throw new Error("error");
     }
+  } catch (e) {
+    return res.status(400).json({ message: "error" }).end();
+  }
+}
+
+export async function registration(req: express.Request, res: express.Response) {
+  try {
+    const errors = expressValidator.validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Validator's error");
+    }
+    const { name, email, password } = req.body;
+    let createdAt = Date.now();
+    let updatedAt = Date.now();
+    let hashedPassword = await passwordHash(password)
+    const client = await Clients.create({
+      name,
+      email,
+      createdAt,
+      updatedAt,
+      hashedPassword
+    });
+
+    return res.status(200).json(client).end();
   } catch (e) {
     return res.status(400).json({ message: "error" }).end();
   }
