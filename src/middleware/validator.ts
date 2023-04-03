@@ -14,7 +14,7 @@ export const clientDataValidate = [
     .isString()
     .withMessage("Email must be a string")
     .isEmail()
-    .withMessage("Email wrong format"),
+    .withMessage("Email wrong format"), 
 ];
 
 export const adminDataValidate = [
@@ -61,6 +61,11 @@ export const masterDataValidate = [
     .withMessage("Town required")
     .isString()
     .withMessage("Town must be a string"),
+  body("email")
+    .exists()
+    .withMessage("Email required")
+    .isString()
+    .withMessage("Email must be a string")
 ];
 
 export const townDataValidator = [

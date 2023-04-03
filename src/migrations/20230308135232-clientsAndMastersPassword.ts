@@ -12,13 +12,21 @@ module.exports = {
     
     await QueryInterface.addColumn("clients", "password", {
       type: DataTypes.CHAR(100),
-      allowNull: true,
+      allowNull: false,
     });
+
+    await QueryInterface.addColumn("masters", "email", {
+      type: DataTypes.CHAR(36),
+      allowNull: false,
+      unique: true
+    }); 
   },
 
   async down(QueryInterface, Sequelize) {
    await QueryInterface.removeColumn("masters", "password")
 
    await QueryInterface.removeColumn("clients", "password")
+
+   await QueryInterface.removeColumn("masters", "email")
   },
 };

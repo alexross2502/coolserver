@@ -1,6 +1,7 @@
 import { Masters } from "../models/models";
 import * as expressValidator from "express-validator";
 import * as express from "express";
+import { passwordHash } from "../utils/passwordHash";
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -8,8 +9,8 @@ export async function create(req: express.Request, res: express.Response) {
     if (!errors.isEmpty()) {
       throw new Error("Validator's error");
     }
-    const { name, surname, rating, townId,  } = req.body;
-
+    const { name, surname, rating, townId, password, email } = req.body;
+    let hashedPassword = await passwordHash(password)
     let createdAt = Date.now();
     let updatedAt = Date.now();
     const master = await Masters.create({
@@ -19,6 +20,8 @@ export async function create(req: express.Request, res: express.Response) {
       townId,
       createdAt,
       updatedAt,
+      password : hashedPassword,
+      email
     });
     return res.status(200).json(master).end();
   } catch (e) {
@@ -28,7 +31,7 @@ export async function create(req: express.Request, res: express.Response) {
 
 export async function getAll(req: express.Request, res: express.Response) {
   const masters = await Masters.findAll({
-    attributes: ["id", "name", "surname", "rating", "townId"],
+    attributes: ["id", "name", "surname", "rating", "townId", "password", "email"],
   });
 
   return res.status(200).json(masters).end();
@@ -51,4 +54,34 @@ export async function getAvailable(
   const { name } = req.params;
   const master = await Masters.findAll({ where: { townName: name } });
   return res.json(master);
+}
+
+export async function registration(
+  req: express.Request,
+  res: express.Response
+) {
+  try {
+    const errors = expressValidator.validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Validator's error");
+    }
+    const { name, surname, rating, townId, password, email } = req.body;
+    let hashedPassword = await passwordHash(password)
+    let createdAt = Date.now();
+    let updatedAt = Date.now();
+    const master = await Masters.create({
+      name,
+      surname,
+      rating,
+      townId,
+      createdAt,
+      updatedAt,
+      password : hashedPassword,
+      email
+    });
+
+    return res.status(200).json(master).end();
+  } catch (e) {
+    return res.status(400).json({ message: e }).end();
+  }
 }

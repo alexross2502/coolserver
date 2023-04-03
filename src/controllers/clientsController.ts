@@ -9,7 +9,8 @@ export async function create(req: express.Request, res: express.Response) {
     if (!errors.isEmpty()) {
       throw new Error("Validator's error");
     }
-    const { name, email } = req.body;
+    const { name, email, password } = req.body;
+    let hashedPassword = await passwordHash(password)
     let createdAt = Date.now();
     let updatedAt = Date.now();
     const client = await Clients.create({
@@ -17,6 +18,7 @@ export async function create(req: express.Request, res: express.Response) {
       email,
       createdAt,
       updatedAt,
+      password : hashedPassword
     });
 
     return res.status(200).json(client).end();
@@ -62,7 +64,7 @@ export async function registration(
       email,
       createdAt,
       updatedAt,
-      hashedPassword,
+      password : hashedPassword,
     });
 
     return res.status(200).json(client).end();

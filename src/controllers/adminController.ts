@@ -41,7 +41,7 @@ export async function create(req: express.Request, res: express.Response) {
       let updatedAt = Date.now();
       let admin = await Admin.create({
         email,
-        hashedPassword,
+        password : hashedPassword,
         createdAt,
         updatedAt,
       });
