@@ -25,7 +25,7 @@ export async function create(req: express.Request, res: express.Response) {
     });
     return res.status(200).json(master).end();
   } catch (e) {
-    return res.status(400).json({ message: "error" }).end();
+    return res.status(400).json({ message: e }).end();
   }
 }
 

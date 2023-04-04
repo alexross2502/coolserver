@@ -24,6 +24,6 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   mastersController.getAvailable
 );
-router.post("/registration", mastersController.registration)
+router.post("/registration", masterDataValidate, mastersController.registration)
 
 module.exports = router;

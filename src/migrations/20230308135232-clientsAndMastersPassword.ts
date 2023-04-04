@@ -17,8 +17,7 @@ module.exports = {
 
     await QueryInterface.addColumn("masters", "email", {
       type: DataTypes.CHAR(36),
-      allowNull: false,
-      unique: true
+      allowNull: false
     }); 
   },
 

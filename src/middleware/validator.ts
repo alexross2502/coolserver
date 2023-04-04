@@ -15,6 +15,13 @@ export const clientDataValidate = [
     .withMessage("Email must be a string")
     .isEmail()
     .withMessage("Email wrong format"), 
+  body("password")
+    .exists()
+    .withMessage("Password required")
+    .isString()
+    .withMessage("Password must be a string")
+    .isLength({ min: 3 })
+    .withMessage("Password must be at least 3 characters long")
 ];
 
 export const adminDataValidate = [
@@ -65,7 +72,14 @@ export const masterDataValidate = [
     .exists()
     .withMessage("Email required")
     .isString()
-    .withMessage("Email must be a string")
+    .withMessage("Email must be a string"),
+  body("password")
+    .exists()
+    .withMessage("Password required")
+    .isString()
+    .withMessage("Password must be a string")
+    .isLength({ min: 5 })
+    .withMessage("Password must be at least 5 characters long"),
 ];
 
 export const townDataValidator = [
