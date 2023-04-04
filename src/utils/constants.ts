@@ -13,3 +13,6 @@ export const transporterCredentials = {
     pass: process.env.POST_PASSWORD,
   },
 };
+
+export const passwordChars =
+  "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

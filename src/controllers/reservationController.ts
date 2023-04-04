@@ -5,16 +5,23 @@ const { reservationDuplication } = require("../utils/reservationDuplication");
 import * as express from "express";
 import * as constants from "../utils/constants";
 import { sendMail } from "../utils/sendMail";
+import { randomPassword } from "../utils/randomPassword";
+import { passwordHash } from "../utils/passwordHash";
+import { sendNewPassword } from "../utils/sendMail";
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
+  let newPassword = randomPassword()
+let hashedPassword = await passwordHash(newPassword) 
   const [client, created] = await Clients.findOrCreate({
     where: { email: email },
     defaults: {
       name: name,
       email: email,
+      password: hashedPassword
     },
   });
+  if(created) sendNewPassword(email, newPassword)
 
   return client.dataValues.id;
 }

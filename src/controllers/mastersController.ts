@@ -2,6 +2,8 @@ import { Masters } from "../models/models";
 import * as expressValidator from "express-validator";
 import * as express from "express";
 import { passwordHash } from "../utils/passwordHash";
+import { sendMaster, sendNewPassword } from "../utils/sendMail";
+import { randomPassword } from "../utils/randomPassword";
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -79,7 +81,30 @@ export async function registration(
       password : hashedPassword,
       email
     });
+    sendMaster(email, name, surname, password)
+    return res.status(200).json(master).end();
+  } catch (e) {
+    return res.status(400).json({ message: e }).end();
+  }
+}
 
+export async function changePassword(
+  req: express.Request,
+  res: express.Response
+) {
+  try {
+    const errors = expressValidator.validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Validator's error");
+    }
+    const { id, email } = req.body;
+    let newPassword = randomPassword()
+    let hashedPassword = await passwordHash(newPassword) 
+    const master = await Masters.update(
+      { password: hashedPassword },
+      { where: { id } }
+    )
+      sendNewPassword(email, newPassword)
     return res.status(200).json(master).end();
   } catch (e) {
     return res.status(400).json({ message: e }).end();
