@@ -21,7 +21,7 @@ export async function check(req: express.Request, res: express.Response) {
       throw new Error("error");
     }
   } catch (e) {
-    return res.status(400).json({ message: e }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }
 
@@ -36,12 +36,12 @@ export async function create(req: express.Request, res: express.Response) {
   });
   try {
     if (!availability) {
-      let hashedPassword = await passwordHash(password)
+      let hashedPassword = await passwordHash(password);
       let createdAt = Date.now();
       let updatedAt = Date.now();
       let admin = await Admin.create({
         email,
-        password : hashedPassword,
+        password: hashedPassword,
         createdAt,
         updatedAt,
       });
@@ -54,6 +54,6 @@ export async function create(req: express.Request, res: express.Response) {
       throw new Error("error");
     }
   } catch (e) {
-    return res.status(400).json({ message: e }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }

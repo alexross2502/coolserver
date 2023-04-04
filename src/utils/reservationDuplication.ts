@@ -1,7 +1,7 @@
 import { Op } from "sequelize";
 import { Reservation } from "../models/models";
 
-async function reservationDuplication(
+async function reservationDuplicationCheck(
   towns_id: string,
   master_id: string,
   start: Date,
@@ -50,4 +50,4 @@ async function reservationDuplication(
   return duplication.length;
 }
 
-export { reservationDuplication };
+export { reservationDuplicationCheck };

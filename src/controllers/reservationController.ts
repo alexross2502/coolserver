@@ -4,14 +4,14 @@ const { Op } = require("sequelize");
 const { reservationDuplication } = require("../utils/reservationDuplication");
 import * as express from "express";
 import * as constants from "../utils/constants";
-import { sendMail } from "../utils/sendMail";
-import { randomPassword } from "../utils/randomPassword";
+import { sendClientOrderMail } from "../utils/sendMail";
+import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { passwordHash } from "../utils/passwordHash";
 import { sendNewPassword } from "../utils/sendMail";
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
-  let newPassword = randomPassword()
+  let newPassword = generateRandomPassword()
 let hashedPassword = await passwordHash(newPassword) 
   const [client, created] = await Clients.findOrCreate({
     where: { email: email },
@@ -81,7 +81,7 @@ export async function create(req: express.Request, res: express.Response) {
       throw new Error("Duplication's error");
     }
   } catch (e) {
-    return res.status(400).json({ message: "error" }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }
 
@@ -148,7 +148,7 @@ export async function availableMasters(
 
     return res.status(200).json(available).end();
   } catch (e) {
-    return res.status(400).json({ message: "error" }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }
 
@@ -187,12 +187,12 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         updatedAt,
       });
       //Отправка письма
-      sendMail(recipient, name, surname, rating);
+      sendClientOrderMail(recipient, name, surname, rating);
       return res.status(200).json(reservation).end();
     } else {
       throw new Error("error");
     }
   } catch (e) {
-    return res.status(400).json({ message: "error" }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }

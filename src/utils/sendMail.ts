@@ -6,7 +6,7 @@ let transporter = nodemailer.createTransport({
 });
 
 ////Отправка письма
-export async function sendMail(recipient, name, surname, rating) {
+export async function sendClientOrderMail(recipient, name, surname, rating) {
   try {
     let result = await transporter.sendMail({
       from: transporterCredentials.auth.user,
@@ -23,7 +23,7 @@ export async function sendMail(recipient, name, surname, rating) {
 }
 
 ////Отправка письма мастеру
-export async function sendMaster(recipient, name, surname, password) {
+export async function sendMasterRegistrationCredentials(recipient, name, surname, password) {
   try {
     let result = await transporter.sendMail({
       from: transporterCredentials.auth.user,
@@ -40,7 +40,7 @@ export async function sendMaster(recipient, name, surname, password) {
 }
 
 ////Отправка письма клиенту
-export async function sendClient(recipient, name, password) {
+export async function sendClientRegistrationCredentials(recipient, name, password) {
   try {
     let result = await transporter.sendMail({
       from: transporterCredentials.auth.user,

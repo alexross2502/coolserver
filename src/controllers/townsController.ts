@@ -14,10 +14,11 @@ export async function create(req: express.Request, res: express.Response) {
     let updatedAt = Date.now();
     const town = await Towns.create({
       name: name,
+      
     });
     return res.status(200).json(town).end();
   } catch (e) {
-    return res.status(400).json({ message: "error" }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }
 

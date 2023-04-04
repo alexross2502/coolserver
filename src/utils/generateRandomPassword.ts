@@ -1,6 +1,6 @@
 import { passwordChars } from "./constants";
 
-function randomPassword() {
+function generateRandomPassword() {
   const passwordLength = 10;
   let password = "";
   for (let i = 0; i <= passwordLength; i++) {
@@ -10,4 +10,4 @@ function randomPassword() {
   return password;
 }
 
-export { randomPassword };
+export { generateRandomPassword };
