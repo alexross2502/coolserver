@@ -9,15 +9,38 @@ import {
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { createNewClient } from "../utils/createNewClient";
 
+export async function create(req: express.Request, res: express.Response) {
+  try {
+    const errors = expressValidator.validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Validator's error");
+    }
+    const { name, email, password } = req.body;
+    const client = await createNewClient(name, email, password);
+    if (!client) throw new Error("error");
+    return res.status(200).json(client).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
+}
+
 export async function registration(
   req: express.Request,
   res: express.Response
 ) {
-  return await createNewClient(req, res, true);
-}
-
-export async function create(req: express.Request, res: express.Response) {
-  return await createNewClient(req, res, false);
+  try {
+    const errors = expressValidator.validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Validator's error");
+    }
+    const { name, email, password } = req.body;
+    const client = await createNewClient(name, email, password);
+    if (!client) throw new Error("error");
+    sendClientRegistrationCredentials(email, name, password);
+    return res.status(200).json(client).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
@@ -48,12 +71,12 @@ export async function changePassword(
     if (!errors.isEmpty()) {
       throw new Error("Validator's error");
     }
-    const { id, email } = req.body;
+    const { email } = req.body;
     let newPassword = generateRandomPassword();
     let hashedPassword = await passwordHash(newPassword);
     const client = await Clients.update(
       { password: hashedPassword },
-      { where: { id } }
+      { where: { email } }
     );
     await sendNewPassword(email, newPassword);
     return res.status(200).json(client).end();

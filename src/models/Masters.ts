@@ -7,7 +7,6 @@ export class Masters extends Model {
   public surname!: string;
   public rating!: number;
   public townId?: typeof DataTypes.UUID;
-  public password!: string;
   public email!: string;
 
   public readonly createdAt!: Date;
@@ -30,7 +29,6 @@ Masters.init(
       allowNull: false,
     },
     townId: { type: DataTypes.CHAR(36), allowNull: true },
-    password: {type: DataTypes.STRING, allowNull: false},
     email: {type: DataTypes.CHAR(36), allowNull: false, unique: true}
   },
   {
