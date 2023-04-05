@@ -18,12 +18,14 @@ export async function getAll(req: express.Request, res: express.Response) {
 }
 
 export async function destroy(req: express.Request, res: express.Response) {
-  const { id } = req.params;
-  const master = await Masters.destroy({ where: { id: id } });
-  if (master) {
+  try {
+    const { id } = req.params;
+    const master = await Masters.findOne({ where: { id: id } });
+    await Access.destroy({ where: { email: master.dataValues.email } });
+    await master.destroy();
     return res.status(200).json(master).end();
-  } else {
-    return res.status(400).json({ message: "error" }).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
   }
 }
 

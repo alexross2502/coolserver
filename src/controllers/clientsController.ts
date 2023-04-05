@@ -1,4 +1,4 @@
-import { Clients } from "../models/models";
+import { Access, Clients } from "../models/models";
 import * as expressValidator from "express-validator";
 import * as express from "express";
 import { passwordHash } from "../utils/passwordHash";
@@ -51,12 +51,10 @@ export async function getAll(req: express.Request, res: express.Response) {
 export async function destroy(req: express.Request, res: express.Response) {
   try {
     const { id } = req.params;
-    const client = await Clients.destroy({ where: { id: id } });
-    if (client) {
-      return res.status(200).json(client).end();
-    } else {
-      throw new Error("error");
-    }
+    const client = await Clients.findOne({ where: { id: id } });
+    await Access.destroy({ where: { email: client.dataValues.email } });
+    await client.destroy();
+    return res.status(200).json(client).end();
   } catch (e) {
     return res.status(400).json({ message: e.message }).end();
   }
@@ -74,7 +72,7 @@ export async function changePassword(
     const { email } = req.body;
     let newPassword = generateRandomPassword();
     let hashedPassword = await passwordHash(newPassword);
-    const client = await Clients.update(
+    const client = await Access.update(
       { password: hashedPassword },
       { where: { email } }
     );
