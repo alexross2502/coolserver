@@ -39,7 +39,6 @@ export async function registration(
     sendClientRegistrationCredentials(email, name, password);
     return res.status(200).json(client).end();
   } catch (e) {
-    console.log(e);
     return res.status(400).json({ message: e.message }).end();
   }
 }
