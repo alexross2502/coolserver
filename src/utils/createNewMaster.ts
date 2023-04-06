@@ -1,4 +1,4 @@
-import { Access, Masters } from "../models/models";
+import { Users, Masters } from "../models/models";
 import { passwordHash } from "./passwordHash";
 
 export async function createMaster(
@@ -13,8 +13,8 @@ export async function createMaster(
     let hashedPassword = await passwordHash(password);
     let createdAt = Date.now();
     let updatedAt = Date.now();
-    let availability = await Access.create({
-      email,
+    let availability = await Users.create({
+      login: email,
       password: hashedPassword,
       role: "master",
     });

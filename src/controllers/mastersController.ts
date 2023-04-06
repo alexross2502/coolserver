@@ -1,4 +1,4 @@
-import { Access, Masters } from "../models/models";
+import { Users, Masters } from "../models/models";
 import * as expressValidator from "express-validator";
 import * as express from "express";
 import { passwordHash } from "../utils/passwordHash";
@@ -21,8 +21,9 @@ export async function destroy(req: express.Request, res: express.Response) {
   try {
     const { id } = req.params;
     const master = await Masters.findOne({ where: { id: id } });
-    await Access.destroy({ where: { email: master.dataValues.email } });
     await master.destroy();
+    await Users.destroy({ where: { login: master.dataValues.email } });
+
     return res.status(200).json(master).end();
   } catch (e) {
     return res.status(400).json({ message: e.message }).end();
@@ -50,9 +51,9 @@ export async function changePassword(
     const { email } = req.body;
     let newPassword = generateRandomPassword();
     let hashedPassword = await passwordHash(newPassword);
-    const master = await Access.update(
+    const master = await Users.update(
       { password: hashedPassword },
-      { where: { email } }
+      { where: { login: email } }
     );
     sendNewPassword(email, newPassword);
     return res.status(200).json(master).end();

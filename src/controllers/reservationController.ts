@@ -1,27 +1,31 @@
 import { Reservation, Masters, Clients } from "../models/models";
 import * as expressValidator from "express-validator";
 const { Op } = require("sequelize");
-const { reservationDuplication } = require("../utils/reservationDuplication");
+const {
+  reservationDuplicationCheck,
+} = require("../utils/reservationDuplication");
 import * as express from "express";
 import * as constants from "../utils/constants";
 import { sendClientOrderMail } from "../utils/sendMail";
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { passwordHash } from "../utils/passwordHash";
 import { sendNewPassword } from "../utils/sendMail";
+import { createNewClient } from "../utils/createNewClient";
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
-  let newPassword = generateRandomPassword()
-let hashedPassword = await passwordHash(newPassword) 
+  let newPassword = generateRandomPassword();
+  let hashedPassword = await passwordHash(newPassword);
+  await createNewClient(name, email, hashedPassword);
   const [client, created] = await Clients.findOrCreate({
     where: { email: email },
     defaults: {
       name: name,
       email: email,
-      password: hashedPassword
+      password: hashedPassword,
     },
   });
-  if(created) sendNewPassword(email, newPassword)
+  if (created) sendNewPassword(email, newPassword);
 
   return client.dataValues.id;
 }
@@ -65,7 +69,9 @@ export async function create(req: express.Request, res: express.Response) {
     let end = new Date(+day + constants.timeSize[size] * 3600 * 1000);
     day = new Date(+day);
 
-    if ((await reservationDuplication(towns_id, master_id, start, end)) === 0) {
+    if (
+      (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
+    ) {
       const reservation = await Reservation.create({
         day,
         end,
@@ -175,7 +181,9 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     let start = new Date(+day);
     let end = new Date(+day + constants.timeSize[size] * 3600 * 1000);
     day = new Date(+day);
-    if ((await reservationDuplication(towns_id, master_id, start, end)) === 0) {
+    if (
+      (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
+    ) {
       const reservation = await Reservation.create({
         day,
         end,

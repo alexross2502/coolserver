@@ -3,7 +3,6 @@ import { Towns } from "./Towns";
 import { Masters } from "./Masters";
 import { Clients } from "./Clients";
 import { Reservation } from "./Reservation";
-import { Access } from "./Access";
+import { Users } from "./Users";
 
-
-export { Admin, Towns, Masters, Clients, Reservation, Access };
+export { Admin, Towns, Masters, Clients, Reservation, Users };

@@ -7,7 +7,7 @@ async function reservationDuplicationCheck(
   start: Date,
   end: Date
 ): Promise<number> {
-  let duplication = await Reservation.findAll({
+  let duplication = await Reservation.count({
     where: {
       towns_id,
       master_id,
@@ -47,7 +47,7 @@ async function reservationDuplicationCheck(
       ],
     },
   });
-  return duplication.length;
+  return duplication;
 }
 
 export { reservationDuplicationCheck };
