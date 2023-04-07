@@ -1,8 +1,8 @@
 import { Admin } from "../models/models";
 import * as expressValidator from "express-validator";
-const bcrypt = require("bcrypt");
 import * as express from "express";
 import { auth } from "../utils/auth";
+import { passwordHash } from "../utils/passwordHash";
 
 export async function check(req: express.Request, res: express.Response) {
   try {
@@ -21,7 +21,7 @@ export async function check(req: express.Request, res: express.Response) {
       throw new Error("error");
     }
   } catch (e) {
-    return res.status(400).json({ message: e }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }
 
@@ -36,13 +36,12 @@ export async function create(req: express.Request, res: express.Response) {
   });
   try {
     if (!availability) {
-      const salt = await bcrypt.genSalt(3);
-      password = await bcrypt.hash(password, salt);
+      let hashedPassword = await passwordHash(password);
       let createdAt = Date.now();
       let updatedAt = Date.now();
       let admin = await Admin.create({
         email,
-        password,
+        password: hashedPassword,
         createdAt,
         updatedAt,
       });
@@ -55,6 +54,6 @@ export async function create(req: express.Request, res: express.Response) {
       throw new Error("error");
     }
   } catch (e) {
-    return res.status(400).json({ message: "error" }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }

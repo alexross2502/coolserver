@@ -1,13 +1,13 @@
 import { Op } from "sequelize";
 import { Reservation } from "../models/models";
 
-async function reservationDuplication(
+async function reservationDuplicationCheck(
   towns_id: string,
   master_id: string,
   start: Date,
   end: Date
 ): Promise<number> {
-  let duplication = await Reservation.findAll({
+  let duplication = await Reservation.count({
     where: {
       towns_id,
       master_id,
@@ -47,7 +47,7 @@ async function reservationDuplication(
       ],
     },
   });
-  return duplication.length;
+  return duplication;
 }
 
-export { reservationDuplication };
+export { reservationDuplicationCheck };

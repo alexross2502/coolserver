@@ -1,21 +1,24 @@
 import { Reservation, Masters, Clients } from "../models/models";
 import * as expressValidator from "express-validator";
 const { Op } = require("sequelize");
-const { reservationDuplication } = require("../utils/reservationDuplication");
+const {
+  reservationDuplicationCheck,
+} = require("../utils/reservationDuplication");
 import * as express from "express";
 import * as constants from "../utils/constants";
-import { sendMail } from "../utils/sendMail";
+import { sendClientOrderMail } from "../utils/sendMail";
+import { generateRandomPassword } from "../utils/generateRandomPassword";
+import { passwordHash } from "../utils/passwordHash";
+import { sendNewPassword } from "../utils/sendMail";
+import { createNewClient } from "../utils/createNewClient";
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
-  const [client, created] = await Clients.findOrCreate({
-    where: { email: email },
-    defaults: {
-      name: name,
-      email: email,
-    },
-  });
-
+  let newPassword = generateRandomPassword();
+  let hashedPassword = await passwordHash(newPassword);
+  let created = await createNewClient(name, email, hashedPassword);
+  if (created) sendNewPassword(email, newPassword)
+  let client = await Clients.findOne({where:{email}})
   return client.dataValues.id;
 }
 
@@ -58,7 +61,9 @@ export async function create(req: express.Request, res: express.Response) {
     let end = new Date(+day + constants.timeSize[size] * 3600 * 1000);
     day = new Date(+day);
 
-    if ((await reservationDuplication(towns_id, master_id, start, end)) === 0) {
+    if (
+      (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
+    ) {
       const reservation = await Reservation.create({
         day,
         end,
@@ -74,7 +79,7 @@ export async function create(req: express.Request, res: express.Response) {
       throw new Error("Duplication's error");
     }
   } catch (e) {
-    return res.status(400).json({ message: "error" }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }
 
@@ -141,7 +146,7 @@ export async function availableMasters(
 
     return res.status(200).json(available).end();
   } catch (e) {
-    return res.status(400).json({ message: "error" }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }
 
@@ -168,7 +173,9 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     let start = new Date(+day);
     let end = new Date(+day + constants.timeSize[size] * 3600 * 1000);
     day = new Date(+day);
-    if ((await reservationDuplication(towns_id, master_id, start, end)) === 0) {
+    if (
+      (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
+    ) {
       const reservation = await Reservation.create({
         day,
         end,
@@ -180,12 +187,12 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         updatedAt,
       });
       //Отправка письма
-      sendMail(recipient, name, surname, rating);
+      sendClientOrderMail(recipient, name, surname, rating);
       return res.status(200).json(reservation).end();
     } else {
       throw new Error("error");
     }
   } catch (e) {
-    return res.status(400).json({ message: "error" }).end();
+    return res.status(400).json({ message: e.message }).end();
   }
 }
