@@ -1,9 +1,7 @@
 import * as nodemailer from "nodemailer";
 import { transporterCredentials } from "./constants";
 
-let transporter = nodemailer.createTransport({
-  ...transporterCredentials,
-});
+let transporter = nodemailer.createTransport(transporterCredentials);
 
 ////Отправка письма
 export async function sendClientOrderMail(recipient, name, surname, rating) {

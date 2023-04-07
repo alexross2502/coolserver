@@ -21,7 +21,6 @@ export async function destroy(req: express.Request, res: express.Response) {
   try {
     const { id } = req.params;
     const master = await Masters.findOne({ where: { id: id } });
-    await master.destroy();
     await Users.destroy({ where: { login: master.dataValues.email } });
 
     return res.status(200).json(master).end();

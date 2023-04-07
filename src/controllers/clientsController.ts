@@ -52,7 +52,6 @@ export async function destroy(req: express.Request, res: express.Response) {
   try {
     const { id } = req.params;
     const client = await Clients.findOne({ where: { id: id } });
-    await client.destroy();
     await Users.destroy({ where: { login: client.dataValues.email } });
     return res.status(200).json(client).end();
   } catch (e) {
