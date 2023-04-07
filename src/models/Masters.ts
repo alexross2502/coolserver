@@ -7,6 +7,7 @@ export class Masters extends Model {
   public surname!: string;
   public rating!: number;
   public townId?: typeof DataTypes.UUID;
+  public email!: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -28,6 +29,7 @@ Masters.init(
       allowNull: false,
     },
     townId: { type: DataTypes.CHAR(36), allowNull: true },
+    email: {type: DataTypes.CHAR(36), allowNull: false, unique: true}
   },
   {
     sequelize,

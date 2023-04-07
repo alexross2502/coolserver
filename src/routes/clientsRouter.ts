@@ -19,5 +19,11 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   clientsController.destroy
 );
+router.post("/registration", clientsController.registration);
+router.put(
+  "/changepassword",
+  passport.authenticate("jwt", { session: false }),
+  clientsController.changePassword
+);
 
 module.exports = router;
