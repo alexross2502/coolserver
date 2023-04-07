@@ -16,17 +16,9 @@ import { createNewClient } from "../utils/createNewClient";
 async function check(name, email) {
   let newPassword = generateRandomPassword();
   let hashedPassword = await passwordHash(newPassword);
-  await createNewClient(name, email, hashedPassword);
-  const [client, created] = await Clients.findOrCreate({
-    where: { email: email },
-    defaults: {
-      name: name,
-      email: email,
-      password: hashedPassword,
-    },
-  });
-  if (created) sendNewPassword(email, newPassword);
-
+  let created = await createNewClient(name, email, hashedPassword);
+  if (created) sendNewPassword(email, newPassword)
+  let client = await Clients.findOne({where:{email}})
   return client.dataValues.id;
 }
 
