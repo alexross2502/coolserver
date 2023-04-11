@@ -1,4 +1,4 @@
-import { Users, Clients } from "../models/models";
+import { Users, Clients, Reservation, Masters } from "../models/models";
 import * as expressValidator from "express-validator";
 import * as express from "express";
 import { passwordHash } from "../utils/passwordHash";
@@ -8,6 +8,8 @@ import {
 } from "../utils/sendMail";
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { createNewClient } from "../utils/createNewClient";
+import { Sequelize } from "sequelize";
+const jwt = require("jsonwebtoken");
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -77,6 +79,37 @@ export async function changePassword(
     );
     await sendNewPassword(email, newPassword);
     return res.status(200).json(client).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
+}
+
+export async function clientsAccountData(
+  req: express.Request,
+  res: express.Response
+) {
+  try {
+    const errors = expressValidator.validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Validator's error");
+    }
+    const token = req.headers.authorization.split(" ")[1];
+    const clientId = jwt.verify(token, "dev-jwt").id;
+    const data = await Reservation.findAll({
+      where: {
+        clientId: clientId,
+      },
+      attributes: ["id", "size", "day", "end", "master_id"],
+      include: {
+        model: Masters,
+        where: {
+          id: Sequelize.col("reservations.master_id"),
+        },
+        attributes: ["name"],
+      },
+    });
+
+    return res.status(200).json({ data }).end();
   } catch (e) {
     return res.status(400).json({ message: e.message }).end();
   }

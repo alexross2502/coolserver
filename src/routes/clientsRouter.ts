@@ -1,5 +1,4 @@
 import * as clientsController from "../controllers/clientsController";
-import * as passport from "passport";
 import * as express from "express";
 const { clientDataValidate } = require("../middleware/validator");
 const router: express.Router = express.Router();
@@ -12,19 +11,20 @@ router.get(
 );
 router.post(
   "/",
-  [passport.authenticate("jwt", { session: false }), clientDataValidate],
+  [roleMiddleware(['admin']), clientDataValidate],
   clientsController.create
 );
 router.delete(
   "/:id",
-  passport.authenticate("jwt", { session: false }),
+  roleMiddleware(['admin']),
   clientsController.destroy
 );
 router.post("/registration", clientsController.registration);
 router.put(
   "/changepassword",
-  passport.authenticate("jwt", { session: false }),
+  roleMiddleware(['admin']),
   clientsController.changePassword
 );
+router.get("/data", roleMiddleware(['client']), clientsController.clientsAccountData)
 
 module.exports = router;

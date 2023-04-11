@@ -1,4 +1,4 @@
-import { Users, Masters } from "../models/models";
+import { Users, Masters, Reservation, Clients } from "../models/models";
 import * as expressValidator from "express-validator";
 import * as express from "express";
 import { passwordHash } from "../utils/passwordHash";
@@ -8,6 +8,8 @@ import {
 } from "../utils/sendMail";
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { createMaster } from "../utils/createNewMaster";
+import { Sequelize } from "sequelize";
+const jwt = require("jsonwebtoken");
 
 export async function getAll(req: express.Request, res: express.Response) {
   const masters = await Masters.findAll({
@@ -22,20 +24,10 @@ export async function destroy(req: express.Request, res: express.Response) {
     const { id } = req.params;
     const master = await Masters.findOne({ where: { id: id } });
     await Users.destroy({ where: { login: master.dataValues.email } });
-
     return res.status(200).json(master).end();
   } catch (e) {
     return res.status(400).json({ message: e.message }).end();
   }
-}
-
-export async function getAvailable(
-  req: express.Request,
-  res: express.Response
-) {
-  const { name } = req.params;
-  const master = await Masters.findAll({ where: { townName: name } });
-  return res.json(master);
 }
 
 export async function changePassword(
@@ -104,6 +96,36 @@ export async function create(req: express.Request, res: express.Response) {
     );
     if (!master) throw new Error("error");
     return res.status(200).json().end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
+}
+
+export async function mastersAccountData(
+  req: express.Request,
+  res: express.Response
+) {
+  try {
+    const errors = expressValidator.validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Validator's error");
+    }
+    const token = req.headers.authorization.split(" ")[1];
+    const masterId = jwt.verify(token, "dev-jwt").id;
+    const data = await Reservation.findAll({
+      where: {
+        master_id: masterId,
+      },
+      attributes: ["id", "size", "day", "end", "clientId"],
+      include: {
+        model: Clients,
+        where: {
+          id: Sequelize.col("reservations.clientId"),
+        },
+        attributes: ["name"],
+      },
+    });
+    return res.status(200).json({ data }).end();
   } catch (e) {
     return res.status(400).json({ message: e.message }).end();
   }

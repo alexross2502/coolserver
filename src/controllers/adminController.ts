@@ -18,7 +18,6 @@ export async function check(req: express.Request, res: express.Response) {
         availability.dataValues.role,
         availability.dataValues.id
       );
-      console.log(authTokens)
       res.status(200).json(authTokens).end();
     } else {
       throw new Error("error");
