@@ -15,6 +15,7 @@ export async function createNewClient(name, email, password) {
       throw new Error("Email is unavailable");
     }
     await Clients.create({
+      id: availability.dataValues.id,
       name,
       email,
       createdAt,

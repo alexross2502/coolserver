@@ -14,8 +14,11 @@ export async function check(req: express.Request, res: express.Response) {
       const authTokens = await auth.login(
         login,
         password,
-        availability.dataValues.password
+        availability.dataValues.password,
+        availability.dataValues.role,
+        availability.dataValues.id
       );
+      console.log(authTokens)
       res.status(200).json(authTokens).end();
     } else {
       throw new Error("error");

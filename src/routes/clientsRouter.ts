@@ -3,10 +3,11 @@ import * as passport from "passport";
 import * as express from "express";
 const { clientDataValidate } = require("../middleware/validator");
 const router: express.Router = express.Router();
+const roleMiddleware = require('../middleware/roleMiddleware')
 
 router.get(
   "/",
-  passport.authenticate("jwt", { session: false }),
+  roleMiddleware(['admin']),
   clientsController.getAll
 );
 router.post(

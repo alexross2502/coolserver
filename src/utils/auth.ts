@@ -11,16 +11,19 @@ class Auth {
     });
   }
 
-  async login(login: string, userPassword: string, adminPassword: string) {
+  async login(login: string, userPassword: string, adminPassword: string, role: string, id: string) {
     let token = "secret";
     if (await this.passwordCheck(userPassword, adminPassword)) {
       token = jwt.sign(
         {
-          login: login,
+          login,
+          role,
+          id
         },
         "dev-jwt",
         { expiresIn: 60 * 60 * 3 }
       );
+      
     }
     return {
       availability: true,
