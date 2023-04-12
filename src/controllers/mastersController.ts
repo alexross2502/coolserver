@@ -9,7 +9,6 @@ import {
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { createMaster } from "../utils/createNewMaster";
 import { Sequelize } from "sequelize";
-const jwt = require("jsonwebtoken");
 
 export async function getAll(req: express.Request, res: express.Response) {
   const masters = await Masters.findAll({
@@ -101,17 +100,13 @@ export async function create(req: express.Request, res: express.Response) {
   }
 }
 
-export async function mastersAccountData(
-  req: express.Request,
-  res: express.Response
-) {
+export async function mastersAccountData(req, res) {
   try {
     const errors = expressValidator.validationResult(req);
     if (!errors.isEmpty()) {
       throw new Error("Validator's error");
     }
-    const token = req.headers.authorization.split(" ")[1];
-    const masterId = jwt.verify(token, "dev-jwt").id;
+    const masterId = req.user.id;
     const data = await Reservation.findAll({
       where: {
         master_id: masterId,

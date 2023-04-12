@@ -9,7 +9,6 @@ import {
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { createNewClient } from "../utils/createNewClient";
 import { Sequelize } from "sequelize";
-const jwt = require("jsonwebtoken");
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -84,17 +83,16 @@ export async function changePassword(
   }
 }
 
-export async function clientsAccountData(
-  req: express.Request,
-  res: express.Response
-) {
+export async function clientsAccountData(req, res) {
   try {
     const errors = expressValidator.validationResult(req);
     if (!errors.isEmpty()) {
       throw new Error("Validator's error");
     }
-    const token = req.headers.authorization.split(" ")[1];
-    const clientId = jwt.verify(token, "dev-jwt").id;
+    if (!req.user) {
+      throw new Error("error");
+    }
+    const clientId = req.user.id;
     const data = await Reservation.findAll({
       where: {
         clientId: clientId,

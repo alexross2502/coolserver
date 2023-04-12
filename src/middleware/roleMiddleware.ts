@@ -1,4 +1,4 @@
-const jwt = require("jsonwebtoken");
+import * as jwt from "jsonwebtoken";
 
 module.exports = function (roles) {
   return function (req, res, next) {
@@ -8,13 +8,21 @@ module.exports = function (roles) {
     try {
       const token = req.headers.authorization.split(" ")[1];
       if (!token) {
-        return res.status(401).json({ message: "Unauthorized" }).end();
+        throw new Error("error");
       }
-      const userRole = jwt.verify(token, "dev-jwt").role;
-      let hasRole = roles.includes(userRole);
+      const decodedToken = jwt.verify(token, "dev-jwt");
+      const payloadFromToken = decodedToken as {
+        login: string;
+        role: string;
+        id: string;
+        iat: number;
+        exp: number;
+      };
+      let hasRole = roles.includes(payloadFromToken.role);
       if (!hasRole) {
-        return res.status(401).json({ message: "Unauthorized" }).end();
+        throw new Error("error");
       }
+      req.user = payloadFromToken;
       next();
     } catch (e) {
       return res.status(401).json({ message: "Unauthorized" }).end();
