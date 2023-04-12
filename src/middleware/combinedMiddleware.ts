@@ -1,9 +1,9 @@
 import roleMiddleware from "./roleMiddleware";
-import tokenDecoding from "./tokenDecoding";
+import tokenDecodingMiddleware from "./tokenDecodingMiddleware";
 
 export const combinedMiddleware = (roles: string[]) => {
   return (req, res, next) => {
-    tokenDecoding(req, res, () => {
+    tokenDecodingMiddleware(req, res, () => {
       roleMiddleware(roles)(req, res, () => {
         next();
       });
