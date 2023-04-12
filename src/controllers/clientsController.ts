@@ -89,9 +89,6 @@ export async function clientsAccountData(req, res) {
     if (!errors.isEmpty()) {
       throw new Error("Validator's error");
     }
-    if (!req.user) {
-      throw new Error("error");
-    }
     const clientId = req.user.id;
     const data = await Reservation.findAll({
       where: {
