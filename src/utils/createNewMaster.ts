@@ -22,6 +22,7 @@ export async function createMaster(
       throw new Error("Email is unavailable");
     }
     await Masters.create({
+      id: availability.dataValues.id,
       name,
       surname,
       rating,

@@ -1,5 +1,7 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../db";
+import { Clients } from "./Clients";
+import { Masters } from "./Masters";
 
 export class Reservation extends Model {
   public id!: typeof DataTypes.UUID;
@@ -40,3 +42,6 @@ Reservation.init(
     modelName: "reservations",
   }
 );
+
+Reservation.belongsTo(Clients, { foreignKey: "clientId" });
+Reservation.belongsTo(Masters, { foreignKey: "master_id" });

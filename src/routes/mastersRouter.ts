@@ -1,28 +1,34 @@
-import * as passport from "passport";
 import * as express from "express";
 const router: express.Router = express.Router();
 import * as mastersController from "../controllers/mastersController";
 const { masterDataValidate } = require("../middleware/validator");
+import * as passport from "passport";
+import { combinedMiddleware } from "../middleware/combinedMiddleware";
 
 router.post(
   "/",
-  [passport.authenticate("jwt", { session: false }), masterDataValidate],
+  [
+    passport.authenticate("jwt", { session: false }),
+    combinedMiddleware(["admin"]),
+    masterDataValidate,
+  ],
   mastersController.create
 );
 router.get(
   "/",
-  passport.authenticate("jwt", { session: false }),
+  [
+    passport.authenticate("jwt", { session: false }),
+    combinedMiddleware(["admin"]),
+  ],
   mastersController.getAll
 );
 router.delete(
   "/:id",
-  passport.authenticate("jwt", { session: false }),
+  [
+    passport.authenticate("jwt", { session: false }),
+    combinedMiddleware(["admin"]),
+  ],
   mastersController.destroy
-);
-router.get(
-  "/:name",
-  passport.authenticate("jwt", { session: false }),
-  mastersController.getAvailable
 );
 router.post(
   "/registration",
@@ -31,8 +37,19 @@ router.post(
 );
 router.put(
   "/changepassword",
-  passport.authenticate("jwt", { session: false }),
+  [
+    passport.authenticate("jwt", { session: false }),
+    combinedMiddleware(["admin"]),
+  ],
   mastersController.changePassword
+);
+router.get(
+  "/data",
+  [
+    passport.authenticate("jwt", { session: false }),
+    combinedMiddleware(["master"]),
+  ],
+  mastersController.mastersAccountData
 );
 
 module.exports = router;
