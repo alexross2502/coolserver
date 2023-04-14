@@ -1,4 +1,4 @@
-import { Reservation, Masters, Clients } from "../models/models";
+import { Reservation, Masters, Clients, Towns } from "../models/models";
 import * as expressValidator from "express-validator";
 const { Op } = require("sequelize");
 const {
@@ -19,9 +19,9 @@ async function check(name, email) {
   let created = await createNewClient(name, email, hashedPassword);
   if (created) {
     sendNewPassword(email, newPassword);
-    let client = await Clients.findOne({ where: { email } });
-    return client.dataValues.id;
   }
+  let client = await Clients.findOne({ where: { email } });
+  return client.dataValues.id;
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
@@ -188,7 +188,20 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         updatedAt,
       });
       //Отправка письма
-      sendClientOrderMail(recipient, name, surname, rating);
+      const town = await Towns.findOne({
+        where: {
+          id: towns_id,
+        },
+      });
+      sendClientOrderMail(
+        recipient,
+        name,
+        surname,
+        rating,
+        day,
+        size,
+        town.dataValues.name
+      );
       return res.status(200).json(reservation).end();
     } else {
       throw new Error("error");

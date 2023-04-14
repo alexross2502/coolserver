@@ -4,7 +4,15 @@ import { transporterCredentials } from "./constants";
 let transporter = nodemailer.createTransport(transporterCredentials);
 
 ////Отправка письма
-export async function sendClientOrderMail(recipient, name, surname, rating) {
+export async function sendClientOrderMail(
+  recipient,
+  name,
+  surname,
+  rating,
+  day,
+  size,
+  townName
+) {
   try {
     let result = await transporter.sendMail({
       from: transporterCredentials.auth.user,
@@ -12,7 +20,7 @@ export async function sendClientOrderMail(recipient, name, surname, rating) {
       subject: "Уведомление о резерве мастера",
       text: "This message was sent from Node js server.",
       html: `
-        Вы успешно заказали мастера ${name} ${surname} с рейтингом ${rating} 
+        Вы успешно заказали мастера ${name} ${surname} с рейтингом ${rating} на ${day} в городе: ${townName}. Размер часов - ${size.sizeTranslate}
         `,
     });
   } catch (e) {
@@ -21,7 +29,12 @@ export async function sendClientOrderMail(recipient, name, surname, rating) {
 }
 
 ////Отправка письма мастеру
-export async function sendMasterRegistrationCredentials(recipient, name, surname, password) {
+export async function sendMasterRegistrationCredentials(
+  recipient,
+  name,
+  surname,
+  password
+) {
   try {
     let result = await transporter.sendMail({
       from: transporterCredentials.auth.user,
@@ -38,7 +51,11 @@ export async function sendMasterRegistrationCredentials(recipient, name, surname
 }
 
 ////Отправка письма клиенту
-export async function sendClientRegistrationCredentials(recipient, name, password) {
+export async function sendClientRegistrationCredentials(
+  recipient,
+  name,
+  password
+) {
   try {
     let result = await transporter.sendMail({
       from: transporterCredentials.auth.user,

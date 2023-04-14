@@ -8,6 +8,12 @@ export const timeSize = {
   large: 5,
 };
 
+export const sizeTranslate = {
+  small: "маленький",
+  medium: "средний",
+  large: "большой",
+};
+
 export const transporterCredentials = {
   host: process.env.POST_HOST,
   auth: {
