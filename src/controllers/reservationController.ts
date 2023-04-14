@@ -17,9 +17,11 @@ async function check(name, email) {
   let newPassword = generateRandomPassword();
   let hashedPassword = await passwordHash(newPassword);
   let created = await createNewClient(name, email, hashedPassword);
-  if (created) {sendNewPassword(email, newPassword)
-  let client = await Clients.findOne({where:{email}})
-  return client.dataValues.id}
+  if (created) {
+    sendNewPassword(email, newPassword);
+    let client = await Clients.findOne({ where: { email } });
+    return client.dataValues.id;
+  }
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
@@ -164,10 +166,9 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     clientName,
   } = req.body;
 
-
   try {
-     //Создание нового клиента или получения id уже существующего
-    let clientId = await check(clientName, recipient)
+    //Создание нового клиента или получения id уже существующего
+    let clientId = await check(clientName, recipient);
     let createdAt = Date.now();
     let updatedAt = Date.now();
     let start = new Date(+day);
