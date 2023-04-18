@@ -1,5 +1,5 @@
 import * as nodemailer from "nodemailer";
-import { apiUrl, transporterCredentials } from "./constants";
+import { AppUrlConfirmation, transporterCredentials } from "./constants";
 
 let transporter = nodemailer.createTransport(transporterCredentials);
 
@@ -98,7 +98,7 @@ export async function sendEmailConfirmation(token, url, recipient) {
       text: "This message was sent from Node js server.",
       html: `
       Для подтверждения почты и активации своей учетной записи, перейдите по ссылке ниже:
-      ${apiUrl}${url}/${token}
+      ${AppUrlConfirmation}
       `,
     });
   } catch (e) {

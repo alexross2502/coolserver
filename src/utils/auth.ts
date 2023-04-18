@@ -1,3 +1,5 @@
+import { authTokenTime } from "./constants";
+
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -34,7 +36,7 @@ class Auth {
           id,
         },
         "dev-jwt",
-        { expiresIn: 60 * 60 * 3 }
+        { expiresIn: authTokenTime }
       );
     }
     return {

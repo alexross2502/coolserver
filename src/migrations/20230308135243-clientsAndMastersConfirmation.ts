@@ -7,12 +7,15 @@ module.exports = {
   up: async (QueryInterface, Sequelize) => {
     await QueryInterface.addColumn("clients", "mailConfirmation", {
       type: DataTypes.BOOLEAN,
+      defaultValue: false,
     });
     await QueryInterface.addColumn("masters", "mailConfirmation", {
       type: DataTypes.BOOLEAN,
+      defaultValue: false,
     });
     await QueryInterface.addColumn("masters", "adminApprove", {
       type: DataTypes.BOOLEAN,
+      defaultValue: false,
     });
   },
 

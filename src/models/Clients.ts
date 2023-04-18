@@ -20,7 +20,11 @@ Clients.init(
     },
     name: { type: DataTypes.STRING, allowNull: false },
     email: { type: DataTypes.STRING, unique: true, allowNull: false },
-    mailConfirmation: { type: DataTypes.BOOLEAN, allowNull: false },
+    mailConfirmation: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     sequelize,

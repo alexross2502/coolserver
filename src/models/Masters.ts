@@ -31,8 +31,16 @@ Masters.init(
     },
     townId: { type: DataTypes.CHAR(36), allowNull: true },
     email: { type: DataTypes.CHAR(36), allowNull: false, unique: true },
-    mailConfirmation: { type: DataTypes.BOOLEAN, allowNull: false },
-    adminApprove: { type: DataTypes.BOOLEAN, allowNull: false },
+    mailConfirmation: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    adminApprove: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     sequelize,
