@@ -16,7 +16,7 @@ import { createNewClient } from "../utils/createNewClient";
 async function check(name, email) {
   let newPassword = generateRandomPassword();
   let hashedPassword = await passwordHash(newPassword);
-  let created = await createNewClient(name, email, hashedPassword);
+  let created = await createNewClient(name, email, hashedPassword, false);
   if (created) {
     sendNewPassword(email, newPassword);
   }

@@ -47,5 +47,6 @@ router.get(
   ],
   clientsController.clientsAccountData
 );
+router.get("/mailconfirmation/:id", clientsController.mailConfirmation);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import * as nodemailer from "nodemailer";
-import { transporterCredentials } from "./constants";
+import { apiUrl, transporterCredentials } from "./constants";
 
 let transporter = nodemailer.createTransport(transporterCredentials);
 
@@ -82,6 +82,24 @@ export async function sendNewPassword(recipient, password) {
       html: `
       Ваш логин - ${recipient}, ваш новый пароль - ${password}, никому его не сообщайте
         `,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+////Отправка письма для подтверждения почты
+export async function sendEmailConfirmation(token, url, recipient) {
+  try {
+    let result = await transporter.sendMail({
+      from: transporterCredentials.auth.user,
+      to: recipient,
+      subject: "Подтверждение почты",
+      text: "This message was sent from Node js server.",
+      html: `
+      Для подтверждения почты и активации своей учетной записи, перейдите по ссылке ниже:
+      ${apiUrl}${url}/${token}
+      `,
     });
   } catch (e) {
     console.log(e);

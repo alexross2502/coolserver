@@ -24,3 +24,5 @@ export const transporterCredentials = {
 
 export const passwordChars =
   "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+export const apiUrl = process.env.API_URL;

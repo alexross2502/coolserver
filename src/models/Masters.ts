@@ -8,6 +8,8 @@ export class Masters extends Model {
   public rating!: number;
   public townId?: typeof DataTypes.UUID;
   public email!: string;
+  public mailConfirmation!: boolean;
+  public adminApprove!: boolean;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -28,7 +30,9 @@ Masters.init(
       allowNull: false,
     },
     townId: { type: DataTypes.CHAR(36), allowNull: true },
-    email: {type: DataTypes.CHAR(36), allowNull: false, unique: true}
+    email: { type: DataTypes.CHAR(36), allowNull: false, unique: true },
+    mailConfirmation: { type: DataTypes.BOOLEAN, allowNull: false },
+    adminApprove: { type: DataTypes.BOOLEAN, allowNull: false },
   },
   {
     sequelize,

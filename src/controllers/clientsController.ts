@@ -4,11 +4,14 @@ import * as express from "express";
 import { passwordHash } from "../utils/passwordHash";
 import {
   sendClientRegistrationCredentials,
+  sendEmailConfirmation,
   sendNewPassword,
 } from "../utils/sendMail";
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { createNewClient } from "../utils/createNewClient";
 import { Sequelize } from "sequelize";
+import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
+import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -17,7 +20,7 @@ export async function create(req: express.Request, res: express.Response) {
       throw new Error("Validator's error");
     }
     const { name, email, password } = req.body;
-    const client = await createNewClient(name, email, password);
+    const client = await createNewClient(name, email, password, true);
     if (!client) throw new Error("error");
     return res.status(200).json(client).end();
   } catch (e) {
@@ -35,8 +38,10 @@ export async function registration(
       throw new Error("Validator's error");
     }
     const { name, email, password } = req.body;
-    const client = await createNewClient(name, email, password);
+    const client = await createNewClient(name, email, password, false);
     if (!client) throw new Error("error");
+    let token = createTokenForEmailConfirmation(client.id);
+    sendEmailConfirmation(token, "/clients/mailconfirmation", email);
     sendClientRegistrationCredentials(email, name, password);
     return res.status(200).json(client).end();
   } catch (e) {
@@ -105,6 +110,19 @@ export async function clientsAccountData(req, res) {
     });
 
     return res.status(200).json({ data }).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
+}
+
+export async function mailConfirmation(
+  req: express.Request,
+  res: express.Response
+) {
+  try {
+    const id = handlingTokenForEmailConfirmation(req.params.id);
+    await Clients.update({ mailConfirmation: true }, { where: { id } });
+    return res.status(200).json().end();
   } catch (e) {
     return res.status(400).json({ message: e.message }).end();
   }
