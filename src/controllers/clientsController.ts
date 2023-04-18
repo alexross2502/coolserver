@@ -50,7 +50,7 @@ export async function registration(
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const clients = await Clients.findAll();
+  const clients = await Clients.findAll({ where: { mailConfirmation: true } });
   return res.status(200).json(clients).end();
 }
 

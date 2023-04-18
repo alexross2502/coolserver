@@ -1,3 +1,4 @@
+import confirmationAndApproveCheck from "./confirmationAndApproveCheck";
 import { authTokenTime } from "./constants";
 
 const jwt = require("jsonwebtoken");
@@ -28,7 +29,10 @@ class Auth {
     id: string
   ) {
     let token = "secret";
-    if (await this.passwordCheck(passwordFromRequest, passwordFromDataBase)) {
+    if (
+      (await this.passwordCheck(passwordFromRequest, passwordFromDataBase)) &&
+      (await confirmationAndApproveCheck(role, id))
+    ) {
       token = jwt.sign(
         {
           login,

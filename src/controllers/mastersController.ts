@@ -14,7 +14,7 @@ import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailCon
 import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const masters = await Masters.findAll();
+  const masters = await Masters.findAll({ where: { mailConfirmation: true } });
   return res.status(200).json(masters).end();
 }
 

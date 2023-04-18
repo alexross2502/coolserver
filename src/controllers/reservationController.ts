@@ -97,6 +97,7 @@ export async function availableMasters(
   try {
     let notAvailable = await Reservation.findAll({
       where: {
+        adminApprove: true,
         towns_id,
         [Op.or]: [
           {
@@ -139,6 +140,7 @@ export async function availableMasters(
 
     let available = await Masters.findAll({
       where: {
+        adminApprove: true,
         townId: towns_id,
         id: {
           [Op.not]: Array.from(notAvailable, (el) => el.dataValues.master_id),
