@@ -8,12 +8,11 @@ export default function (token) {
       id: string;
       type: string;
     };
-    console.log(payloadFromToken, "payloadFromToken");
     if (payloadFromToken.type !== "confirmation") {
-      return undefined;
+      return new Error("error");
     }
     return payloadFromToken.id;
   } catch (e) {
-    return undefined;
+    return new Error(e.message);
   }
 }
