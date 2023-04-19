@@ -25,17 +25,7 @@ async function check(name, email) {
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const reservation = await Reservation.findAll({
-    attributes: [
-      "id",
-      "day",
-      "end",
-      "size",
-      "master_id",
-      "towns_id",
-      "clientId",
-    ],
-  });
+  const reservation = await Reservation.findAll();
   return res.status(200).json(reservation).end();
 }
 
