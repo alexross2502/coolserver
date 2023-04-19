@@ -51,5 +51,14 @@ router.get(
   ],
   mastersController.mastersAccountData
 );
+router.put(
+  "/approveaccount",
+  [
+    passport.authenticate("jwt", { session: false }),
+    combinedMiddleware(["admin"]),
+  ],
+  mastersController.approveMasterAccount
+);
+router.get("/mailconfirmation/:id", mastersController.mailConfirmation);
 
 module.exports = router;

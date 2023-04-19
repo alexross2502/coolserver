@@ -1,4 +1,4 @@
-import { Reservation, Masters, Clients } from "../models/models";
+import { Reservation, Masters, Clients, Towns } from "../models/models";
 import * as expressValidator from "express-validator";
 const { Op } = require("sequelize");
 const {
@@ -16,12 +16,12 @@ import { createNewClient } from "../utils/createNewClient";
 async function check(name, email) {
   let newPassword = generateRandomPassword();
   let hashedPassword = await passwordHash(newPassword);
-  let created = await createNewClient(name, email, hashedPassword);
+  let created = await createNewClient(name, email, hashedPassword, false);
   if (created) {
     sendNewPassword(email, newPassword);
-    let client = await Clients.findOne({ where: { email } });
-    return client.dataValues.id;
   }
+  let client = await Clients.findOne({ where: { email } });
+  return client.dataValues.id;
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
@@ -97,6 +97,7 @@ export async function availableMasters(
   try {
     let notAvailable = await Reservation.findAll({
       where: {
+        adminApprove: true,
         towns_id,
         [Op.or]: [
           {
@@ -139,6 +140,7 @@ export async function availableMasters(
 
     let available = await Masters.findAll({
       where: {
+        adminApprove: true,
         townId: towns_id,
         id: {
           [Op.not]: Array.from(notAvailable, (el) => el.dataValues.master_id),
@@ -188,7 +190,20 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         updatedAt,
       });
       //Отправка письма
-      sendClientOrderMail(recipient, name, surname, rating);
+      const town = await Towns.findOne({
+        where: {
+          id: towns_id,
+        },
+      });
+      sendClientOrderMail(
+        recipient,
+        name,
+        surname,
+        rating,
+        day,
+        size,
+        town.dataValues.name
+      );
       return res.status(200).json(reservation).end();
     } else {
       throw new Error("error");

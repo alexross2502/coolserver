@@ -8,6 +8,12 @@ export const timeSize = {
   large: 5,
 };
 
+export const sizeTranslate = {
+  small: "маленький",
+  medium: "средний",
+  large: "большой",
+};
+
 export const transporterCredentials = {
   host: process.env.POST_HOST,
   auth: {
@@ -18,3 +24,9 @@ export const transporterCredentials = {
 
 export const passwordChars =
   "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+export const AppUrlConfirmation = process.env.APP_URL_CONFIRMATION;
+
+export const confirmationTokenTime = 60 * 60 * 24;
+
+export const authTokenTime = 60 * 60 * 3;

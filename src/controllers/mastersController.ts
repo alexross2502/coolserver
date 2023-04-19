@@ -3,18 +3,18 @@ import * as expressValidator from "express-validator";
 import * as express from "express";
 import { passwordHash } from "../utils/passwordHash";
 import {
+  sendEmailConfirmation,
   sendMasterRegistrationCredentials,
   sendNewPassword,
 } from "../utils/sendMail";
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { createMaster } from "../utils/createNewMaster";
 import { Sequelize } from "sequelize";
+import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
+import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const masters = await Masters.findAll({
-    attributes: ["id", "name", "surname", "rating", "townId", "email"],
-  });
-
+  const masters = await Masters.findAll({ where: { mailConfirmation: true } });
   return res.status(200).json(masters).end();
 }
 
@@ -61,16 +61,20 @@ export async function registration(
     if (!errors.isEmpty()) {
       throw new Error("Validator's error");
     }
-    const { name, surname, rating, townId, password, email } = req.body;
+    const { name, surname, townId, password, email } = req.body;
     const master = await createMaster(
       name,
       surname,
-      rating,
+      5,
       townId,
       email,
-      password
+      password,
+      false,
+      false
     );
     if (!master) throw new Error("error");
+    let token = createTokenForEmailConfirmation(master.id);
+    sendEmailConfirmation(token, "/masters/mailconfirmation", email);
     sendMasterRegistrationCredentials(email, name, surname, password);
     return res.status(200).json().end();
   } catch (e) {
@@ -91,7 +95,9 @@ export async function create(req: express.Request, res: express.Response) {
       rating,
       townId,
       email,
-      password
+      password,
+      true,
+      true
     );
     if (!master) throw new Error("error");
     return res.status(200).json().end();
@@ -121,6 +127,33 @@ export async function mastersAccountData(req, res) {
       },
     });
     return res.status(200).json({ data }).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
+}
+
+export async function approveMasterAccount(req, res) {
+  try {
+    const errors = expressValidator.validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Validator's error");
+    }
+    const { id } = req.body;
+    await Masters.update({ adminApprove: true }, { where: { id } });
+    return res.status(200).json().end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
+}
+
+export async function mailConfirmation(
+  req: express.Request,
+  res: express.Response
+) {
+  try {
+    const id = handlingTokenForEmailConfirmation(req.params.id);
+    await Masters.update({ mailConfirmation: true }, { where: { id } });
+    return res.status(200).json().end();
   } catch (e) {
     return res.status(400).json({ message: e.message }).end();
   }
