@@ -12,6 +12,7 @@ import { createMaster } from "../utils/createNewMaster";
 import { Sequelize } from "sequelize";
 import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
 import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
+import decodingToken from "../utils/decodingToken";
 
 export async function getAll(req: express.Request, res: express.Response) {
   const masters = await Masters.findAll({ where: { mailConfirmation: true } });
@@ -152,8 +153,30 @@ export async function mailConfirmation(
 ) {
   try {
     const id = handlingTokenForEmailConfirmation(req.params.id);
+    const masterId = decodingToken(req.headers.authorization);
     await Masters.update({ mailConfirmation: true }, { where: { id } });
     return res.status(200).json().end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
+}
+
+export async function changeReservationStatus(
+  req: express.Request,
+  res: express.Response
+) {
+  try {
+    const errors = expressValidator.validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Validator's error");
+    }
+    const { id } = req.body;
+    const masterId = decodingToken(req.headers.authorization);
+    const reservation = await Reservation.update(
+      { status: "executed" },
+      { where: { id, master_id: masterId.id } }
+    );
+    return res.status(200).json(reservation).end();
   } catch (e) {
     return res.status(400).json({ message: e.message }).end();
   }

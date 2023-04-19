@@ -7,11 +7,11 @@ module.exports = {
   up: async (QueryInterface, Sequelize) => {
     await QueryInterface.addColumn("reservations", "status", {
       type: DataTypes.ENUM("canceled", "confirmed", "executed"),
+      defaultValue: "confirmed",
       allowNull: false,
     });
     await QueryInterface.addColumn("reservations", "price", {
       type: DataTypes.INTEGER,
-      defaultValue: "confirmed",
       allowNull: false,
     });
     await QueryInterface.addColumn("towns", "tariff", {
