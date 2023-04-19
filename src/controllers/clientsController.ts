@@ -41,7 +41,7 @@ export async function registration(
     const client = await createNewClient(name, email, password, false);
     if (!client) throw new Error("error");
     let token = createTokenForEmailConfirmation(client.id);
-    sendEmailConfirmation(token, "/clients/mailconfirmation", email);
+    sendEmailConfirmation(token, "clients", email);
     sendClientRegistrationCredentials(email, name, password);
     return res.status(200).json(client).end();
   } catch (e) {
@@ -121,9 +121,10 @@ export async function mailConfirmation(
 ) {
   try {
     const id = handlingTokenForEmailConfirmation(req.params.id);
+    if (!id) throw new Error("error");
     await Clients.update({ mailConfirmation: true }, { where: { id } });
-    return res.status(200).json().end();
+    return res.status(200).json(true).end();
   } catch (e) {
-    return res.status(400).json({ message: e.message }).end();
+    return res.status(400).json().end();
   }
 }

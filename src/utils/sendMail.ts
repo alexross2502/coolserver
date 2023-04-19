@@ -98,7 +98,7 @@ export async function sendEmailConfirmation(token, url, recipient) {
       text: "This message was sent from Node js server.",
       html: `
       Для подтверждения почты и активации своей учетной записи, перейдите по ссылке ниже:
-      ${AppUrlConfirmation}?token=${token}&url=${url}
+      ${AppUrlConfirmation}/token=${token}/url=${url}
       `,
     });
   } catch (e) {

@@ -74,7 +74,7 @@ export async function registration(
     );
     if (!master) throw new Error("error");
     let token = createTokenForEmailConfirmation(master.id);
-    sendEmailConfirmation(token, "/masters/mailconfirmation", email);
+    sendEmailConfirmation(token, "masters", email);
     sendMasterRegistrationCredentials(email, name, surname, password);
     return res.status(200).json().end();
   } catch (e) {
