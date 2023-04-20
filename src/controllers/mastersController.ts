@@ -9,10 +9,11 @@ import {
 } from "../utils/sendMail";
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { createMaster } from "../utils/createNewMaster";
-import { Sequelize } from "sequelize";
+import { Op, Sequelize, where } from "sequelize";
 import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
 import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
 import decodingToken from "../utils/decodingToken";
+import { Iwhere } from "../interfaces/interfaces";
 
 export async function getAll(req: express.Request, res: express.Response) {
   const masters = await Masters.findAll({ where: { mailConfirmation: true } });
@@ -118,7 +119,7 @@ export async function mastersAccountData(req, res) {
       where: {
         master_id: masterId,
       },
-      attributes: ["id", "size", "day", "end", "clientId"],
+      attributes: ["id", "size", "day", "end", "clientId", "price", "status"],
       include: {
         model: Clients,
         where: {
@@ -166,18 +167,23 @@ export async function changeReservationStatus(
   res: express.Response
 ) {
   try {
+    const whereOptions: Iwhere = {};
     const errors = expressValidator.validationResult(req);
     if (!errors.isEmpty()) {
       throw new Error("Validator's error");
     }
-    const { id } = req.body;
-    const masterId = decodingToken(req.headers.authorization);
+    const { id, status } = req.body;
+    const token = decodingToken(req.headers.authorization);
+    if (token.role === "master") {
+      whereOptions.master_id = token.id;
+    }
     const reservation = await Reservation.update(
-      { status: "executed" },
-      { where: { id, master_id: masterId.id } }
+      { status: status },
+      { where: { id, end: { [Op.gt]: new Date() }, ...whereOptions } }
     );
     return res.status(200).json(reservation).end();
   } catch (e) {
+    console.log(e);
     return res.status(400).json({ message: e.message }).end();
   }
 }

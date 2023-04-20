@@ -64,7 +64,7 @@ router.put(
   "/changestatus",
   [
     passport.authenticate("jwt", { session: false }),
-    combinedMiddleware(["master"]),
+    combinedMiddleware(["master", "admin"]),
   ],
   mastersController.changeReservationStatus
 );

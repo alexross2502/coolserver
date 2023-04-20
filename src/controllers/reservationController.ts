@@ -172,7 +172,6 @@ export async function makeOrder(req: express.Request, res: express.Response) {
       (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
     ) {
       const price = await priceCalculation(towns_id, size);
-      console.log(price);
       const reservation = await Reservation.create({
         day,
         end,
