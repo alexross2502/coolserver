@@ -1,4 +1,4 @@
-import { Admin } from "../models/models";
+import { Admin, Users } from "../models/models";
 import * as expressValidator from "express-validator";
 import * as express from "express";
 import { auth } from "../utils/auth";
@@ -7,14 +7,16 @@ import { passwordHash } from "../utils/passwordHash";
 export async function check(req: express.Request, res: express.Response) {
   try {
     let { login, password } = req.body;
-    let availability = await Admin.findOne({
-      where: { email: login },
+    let availability = await Users.findOne({
+      where: { login: login },
     });
     if (!!availability) {
       const authTokens = await auth.login(
         login,
         password,
-        availability.dataValues.password
+        availability.dataValues.password,
+        availability.dataValues.role,
+        availability.dataValues.id
       );
       res.status(200).json(authTokens).end();
     } else {

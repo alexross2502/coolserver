@@ -8,16 +8,28 @@ export class Masters extends Model {
   public rating!: number;
   public townId?: typeof DataTypes.UUID;
   public email!: string;
+  public mailConfirmation!: boolean;
+  public adminApprove!: boolean;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+}
+
+export interface MasterAttributes {
+  id?: typeof DataTypes.UUID;
+  name?: string;
+  surname?: string;
+  rating?: number;
+  townId?: typeof DataTypes.UUID;
+  email?: string;
+  mailConfirmation?: boolean;
+  adminApprove?: boolean;
 }
 
 Masters.init(
   {
     id: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
       unique: true,
     },
@@ -29,7 +41,17 @@ Masters.init(
       allowNull: false,
     },
     townId: { type: DataTypes.CHAR(36), allowNull: true },
-    email: {type: DataTypes.CHAR(36), allowNull: false, unique: true}
+    email: { type: DataTypes.CHAR(36), allowNull: false, unique: true },
+    mailConfirmation: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    adminApprove: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     sequelize,

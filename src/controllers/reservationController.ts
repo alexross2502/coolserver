@@ -1,4 +1,4 @@
-import { Reservation, Masters, Clients } from "../models/models";
+import { Reservation, Masters, Clients, Towns } from "../models/models";
 import * as expressValidator from "express-validator";
 const { Op } = require("sequelize");
 const {
@@ -11,29 +11,22 @@ import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { passwordHash } from "../utils/passwordHash";
 import { sendNewPassword } from "../utils/sendMail";
 import { createNewClient } from "../utils/createNewClient";
+import priceCalculation from "../utils/priceCalculator";
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
   let newPassword = generateRandomPassword();
   let hashedPassword = await passwordHash(newPassword);
-  let created = await createNewClient(name, email, hashedPassword);
-  if (created) sendNewPassword(email, newPassword)
-  let client = await Clients.findOne({where:{email}})
+  let created = await createNewClient(name, email, hashedPassword, false);
+  if (created) {
+    sendNewPassword(email, newPassword);
+  }
+  let client = await Clients.findOne({ where: { email } });
   return client.dataValues.id;
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const reservation = await Reservation.findAll({
-    attributes: [
-      "id",
-      "day",
-      "end",
-      "size",
-      "master_id",
-      "towns_id",
-      "clientId",
-    ],
-  });
+  const reservation = await Reservation.findAll();
   return res.status(200).json(reservation).end();
 }
 
@@ -64,6 +57,7 @@ export async function create(req: express.Request, res: express.Response) {
     if (
       (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
     ) {
+      const price = await priceCalculation(towns_id, size);
       const reservation = await Reservation.create({
         day,
         end,
@@ -73,6 +67,7 @@ export async function create(req: express.Request, res: express.Response) {
         clientId,
         createdAt,
         updatedAt,
+        price,
       });
       return res.status(200).json(reservation).end();
     } else {
@@ -137,6 +132,7 @@ export async function availableMasters(
 
     let available = await Masters.findAll({
       where: {
+        adminApprove: true,
         townId: towns_id,
         id: {
           [Op.not]: Array.from(notAvailable, (el) => el.dataValues.master_id),
@@ -164,10 +160,9 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     clientName,
   } = req.body;
 
-  //Создание нового клиента или получения id уже существующего
-  let clientId = await check(clientName, recipient);
-
   try {
+    //Создание нового клиента или получения id уже существующего
+    let clientId = await check(clientName, recipient);
     let createdAt = Date.now();
     let updatedAt = Date.now();
     let start = new Date(+day);
@@ -176,6 +171,11 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     if (
       (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
     ) {
+      const city = await Towns.findOne({
+        where: { id: towns_id },
+        attributes: ["tariff"],
+      });
+      const price = await priceCalculation(city.dataValues.tariff, size);
       const reservation = await Reservation.create({
         day,
         end,
@@ -185,9 +185,23 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         clientId,
         createdAt,
         updatedAt,
+        price,
       });
       //Отправка письма
-      sendClientOrderMail(recipient, name, surname, rating);
+      const town = await Towns.findOne({
+        where: {
+          id: towns_id,
+        },
+      });
+      sendClientOrderMail(
+        recipient,
+        name,
+        surname,
+        rating,
+        day,
+        size,
+        town.dataValues.name
+      );
       return res.status(200).json(reservation).end();
     } else {
       throw new Error("error");

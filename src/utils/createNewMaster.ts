@@ -7,7 +7,9 @@ export async function createMaster(
   rating,
   townId,
   email,
-  password
+  password,
+  mailConfirmation,
+  adminApprove
 ) {
   try {
     let hashedPassword = await passwordHash(password);
@@ -22,6 +24,7 @@ export async function createMaster(
       throw new Error("Email is unavailable");
     }
     await Masters.create({
+      id: availability.dataValues.id,
       name,
       surname,
       rating,
@@ -29,8 +32,10 @@ export async function createMaster(
       createdAt,
       updatedAt,
       email,
+      mailConfirmation,
+      adminApprove,
     });
-    return true;
+    return availability.dataValues;
   } catch (e) {
     return false;
   }
