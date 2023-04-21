@@ -1,4 +1,5 @@
 import * as jwt from "jsonwebtoken";
+import { DataTypes } from "sequelize";
 
 export default function (data) {
   try {
@@ -7,7 +8,7 @@ export default function (data) {
     const payloadFromToken = decodedToken as {
       login: string;
       role: string;
-      id: string;
+      id: typeof DataTypes.UUID;
       iat: number;
       exp: number;
     };

@@ -12,7 +12,7 @@ import { createNewClient } from "../utils/createNewClient";
 import { Sequelize } from "sequelize";
 import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
 import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
-import { Iwhere } from "../interfaces/interfaces";
+import { ClientAttributes } from "../models/Clients";
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -51,9 +51,9 @@ export async function registration(
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const whereOptions: Iwhere = {};
-
-  if (req.params.confirmation === "true") {
+  const whereOptions: ClientAttributes = {};
+  const { mailConfirmation } = req.query;
+  if (mailConfirmation === "true") {
     whereOptions.mailConfirmation = true;
   }
   const clients = await Clients.findAll({

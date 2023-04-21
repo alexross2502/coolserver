@@ -15,6 +15,17 @@ export class Masters extends Model {
   public readonly updatedAt!: Date;
 }
 
+export interface MasterAttributes {
+  id?: typeof DataTypes.UUID;
+  name?: string;
+  surname?: string;
+  rating?: number;
+  townId?: typeof DataTypes.UUID;
+  email?: string;
+  mailConfirmation?: boolean;
+  adminApprove?: boolean;
+}
+
 Masters.init(
   {
     id: {

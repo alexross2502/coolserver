@@ -6,7 +6,7 @@ import * as passport from "passport";
 import { combinedMiddleware } from "../middleware/combinedMiddleware";
 
 router.get(
-  "/:confirmation?",
+  "/",
   [
     passport.authenticate("jwt", { session: false }),
     combinedMiddleware(["admin"]),

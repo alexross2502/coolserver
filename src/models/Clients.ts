@@ -11,6 +11,13 @@ export class Clients extends Model {
   public readonly updatedAt!: Date;
 }
 
+export interface ClientAttributes {
+  id?: typeof DataTypes.UUID;
+  name?: string;
+  email?: string;
+  mailConfirmation?: boolean;
+}
+
 Clients.init(
   {
     id: {

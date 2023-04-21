@@ -18,6 +18,18 @@ export class Reservation extends Model {
   public readonly updatedAt!: Date;
 }
 
+export interface ReservationAttributes {
+  id?: typeof DataTypes.UUID;
+  day?: Date;
+  size?: string;
+  end?: Date;
+  master_id?: typeof DataTypes.UUID;
+  towns_id?: typeof DataTypes.UUID;
+  clientId?: typeof DataTypes.UUID;
+  status?: typeof DataTypes.ENUM;
+  price?: typeof DataTypes.INTEGER;
+}
+
 Reservation.init(
   {
     id: {

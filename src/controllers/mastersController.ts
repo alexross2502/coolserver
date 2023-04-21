@@ -9,14 +9,23 @@ import {
 } from "../utils/sendMail";
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { createMaster } from "../utils/createNewMaster";
-import { Op, Sequelize, where } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
 import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
-import decodingToken from "../utils/decodingToken";
-import { Iwhere } from "../interfaces/interfaces";
+import decodingToken from "../utils/tokenDecoder";
+import { ReservationAttributes } from "../models/Reservation";
+import { MasterAttributes } from "../models/Masters";
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const masters = await Masters.findAll({ where: { mailConfirmation: true } });
+  const whereOptions: MasterAttributes = {};
+  const { mailConfirmation, adminApprove } = req.query;
+  if (mailConfirmation === "true") {
+    whereOptions.mailConfirmation = true;
+  }
+  if (adminApprove === "true") {
+    whereOptions.adminApprove = true;
+  }
+  const masters = await Masters.findAll({ where: { ...whereOptions } });
   return res.status(200).json(masters).end();
 }
 
@@ -167,7 +176,7 @@ export async function changeReservationStatus(
   res: express.Response
 ) {
   try {
-    const whereOptions: Iwhere = {};
+    const whereOptions: ReservationAttributes = {};
     const errors = expressValidator.validationResult(req);
     if (!errors.isEmpty()) {
       throw new Error("Validator's error");
@@ -183,7 +192,6 @@ export async function changeReservationStatus(
     );
     return res.status(200).json(reservation).end();
   } catch (e) {
-    console.log(e);
     return res.status(400).json({ message: e.message }).end();
   }
 }

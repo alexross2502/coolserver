@@ -11,7 +11,7 @@ import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { passwordHash } from "../utils/passwordHash";
 import { sendNewPassword } from "../utils/sendMail";
 import { createNewClient } from "../utils/createNewClient";
-import priceCalculation from "../utils/priceCalculation";
+import priceCalculation from "../utils/priceCalculator";
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
@@ -171,7 +171,11 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     if (
       (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
     ) {
-      const price = await priceCalculation(towns_id, size);
+      const city = await Towns.findOne({
+        where: { id: towns_id },
+        attributes: ["tariff"],
+      });
+      const price = await priceCalculation(city.dataValues.tariff, size);
       const reservation = await Reservation.create({
         day,
         end,
