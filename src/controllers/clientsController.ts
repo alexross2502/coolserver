@@ -12,6 +12,7 @@ import { createNewClient } from "../utils/createNewClient";
 import { Sequelize } from "sequelize";
 import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
 import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
+import { ClientsWhereOptions } from "../models/Clients";
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -50,7 +51,14 @@ export async function registration(
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const clients = await Clients.findAll({ where: { mailConfirmation: true } });
+  const options: ClientsWhereOptions = {};
+  const { mailConfirmation } = req.query;
+  if (mailConfirmation === "true") {
+    options.mailConfirmation = true;
+  }
+  const clients = await Clients.findAll({
+    where: options,
+  });
   return res.status(200).json(clients).end();
 }
 
@@ -99,7 +107,7 @@ export async function clientsAccountData(req, res) {
       where: {
         clientId: clientId,
       },
-      attributes: ["id", "size", "day", "end", "master_id"],
+      attributes: ["id", "size", "day", "end", "master_id", "price"],
       include: {
         model: Masters,
         where: {

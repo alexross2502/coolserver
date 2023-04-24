@@ -1,4 +1,4 @@
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, WhereOptions } from "sequelize";
 import sequelize from "../db";
 
 export class Clients extends Model {
@@ -31,3 +31,12 @@ Clients.init(
     modelName: "clients",
   }
 );
+
+export type ClientsWhereOptions = WhereOptions & {
+  id?: typeof DataTypes.UUID;
+  name?: string;
+  email?: string;
+  mailConfirmation?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+};

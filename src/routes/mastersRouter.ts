@@ -60,5 +60,13 @@ router.put(
   mastersController.approveMasterAccount
 );
 router.get("/mailconfirmation/:id", mastersController.mailConfirmation);
+router.put(
+  "/changestatus",
+  [
+    passport.authenticate("jwt", { session: false }),
+    combinedMiddleware(["master", "admin"]),
+  ],
+  mastersController.changeReservationStatus
+);
 
 module.exports = router;

@@ -9,12 +9,23 @@ import {
 } from "../utils/sendMail";
 import { generateRandomPassword } from "../utils/generateRandomPassword";
 import { createMaster } from "../utils/createNewMaster";
-import { Sequelize } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
 import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
+import decodingToken from "../utils/tokenDecoder";
+import { ReservationAttributes } from "../models/Reservation";
+import { MastersWhereOptions } from "../models/Masters";
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const masters = await Masters.findAll({ where: { mailConfirmation: true } });
+  const options: MastersWhereOptions = {};
+  const { mailConfirmation, adminApprove } = req.query;
+  if (mailConfirmation === "true") {
+    options.mailConfirmation = true;
+  }
+  if (adminApprove === "true") {
+    options.adminApprove = true;
+  }
+  const masters = await Masters.findAll({ where: options });
   return res.status(200).json(masters).end();
 }
 
@@ -117,7 +128,7 @@ export async function mastersAccountData(req, res) {
       where: {
         master_id: masterId,
       },
-      attributes: ["id", "size", "day", "end", "clientId"],
+      attributes: ["id", "size", "day", "end", "clientId", "price", "status"],
       include: {
         model: Clients,
         where: {
@@ -152,8 +163,34 @@ export async function mailConfirmation(
 ) {
   try {
     const id = handlingTokenForEmailConfirmation(req.params.id);
+    const masterId = decodingToken(req.headers.authorization);
     await Masters.update({ mailConfirmation: true }, { where: { id } });
     return res.status(200).json().end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
+}
+
+export async function changeReservationStatus(
+  req: express.Request,
+  res: express.Response
+) {
+  try {
+    const whereOptions: ReservationAttributes = {};
+    const errors = expressValidator.validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new Error("Validator's error");
+    }
+    const { id, status } = req.body;
+    const token = decodingToken(req.headers.authorization);
+    if (token.role === "master") {
+      whereOptions.master_id = token.id;
+    }
+    const reservation = await Reservation.update(
+      { status: status },
+      { where: { id, end: { [Op.gt]: new Date() }, ...whereOptions } }
+    );
+    return res.status(200).json(reservation).end();
   } catch (e) {
     return res.status(400).json({ message: e.message }).end();
   }
