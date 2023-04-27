@@ -4,6 +4,7 @@ import * as cors from "cors";
 import * as passport from "passport";
 import sequelize from "./db";
 import router from "./routes/index";
+import * as bodyParser from "body-parser";
 
 dotenv.config();
 
@@ -18,7 +19,8 @@ app.use(
 
 app.use(passport.initialize());
 require("./middleware/passport")(passport);
-
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 app.use(express.json());
 app.use("/api", router);
 

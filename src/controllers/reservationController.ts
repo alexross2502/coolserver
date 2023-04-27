@@ -12,6 +12,25 @@ import { passwordHash } from "../utils/passwordHash";
 import { sendNewPassword } from "../utils/sendMail";
 import { createNewClient } from "../utils/createNewClient";
 import priceCalculation from "../utils/priceCalculator";
+const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+cloudinary.config({
+  cloud_name: "dzehn7px9",
+  api_key: "198777218699596",
+  api_secret: "GupoZJ9xZ8A8ev1aBbY5NltaxDQ",
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    //folder: 'your_folder_name',
+    allowed_formats: ["jpg", "png"],
+  },
+});
+
+const upload = multer({ storage: storage });
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
@@ -26,6 +45,29 @@ async function check(name, email) {
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
+  const res1 = cloudinary.uploader.upload(
+    "https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg",
+    { public_id: "olympic_flag" }
+  );
+
+  res1
+    .then((data) => {
+      console.log(data);
+      console.log(data.secure_url);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  // Generate
+  const url = cloudinary.url("olympic_flag", {
+    width: 100,
+    height: 150,
+    Crop: "fill",
+  });
+
+  // The output url
+  console.log(url);
   const reservation = await Reservation.findAll();
   return res.status(200).json(reservation).end();
 }
@@ -162,8 +204,20 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     surname,
     rating,
     clientName,
+    image,
   } = req.body;
 
+  try {
+    const uploadPromises = image.map((file) => {
+      return cloudinary.uploader.upload(file.path);
+    });
+
+    const uploadedImages = await Promise.all(uploadPromises);
+
+    console.log(uploadedImages);
+  } catch (e) {
+    console.log(e);
+  }
   try {
     //Создание нового клиента или получения id уже существующего
     let clientId = await check(clientName, recipient);
