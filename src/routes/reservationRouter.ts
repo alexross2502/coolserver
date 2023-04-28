@@ -32,5 +32,13 @@ router.delete(
 );
 router.post("/order", reservationController.makeOrder);
 router.post("/available", reservationController.availableMasters);
+router.post(
+  "/images",
+  [
+    passport.authenticate("jwt", { session: false }),
+    combinedMiddleware(["admin"]),
+  ],
+  reservationController.getAllImages
+);
 
 module.exports = router;

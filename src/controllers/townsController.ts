@@ -1,5 +1,5 @@
 import * as expressValidator from "express-validator";
-import { Towns } from "../models/Towns";
+import { Towns, TownsWhereOptions } from "../models/Towns";
 import * as express from "express";
 
 export async function create(req: express.Request, res: express.Response) {
@@ -23,8 +23,16 @@ export async function create(req: express.Request, res: express.Response) {
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const towns = await Towns.findAll();
-  return res.status(200).json(towns).end();
+  const options: TownsWhereOptions = {};
+  const { offset, limit } = req.query;
+  if (limit && offset) {
+    options.offset = +offset;
+    options.limit = +limit;
+  }
+
+  const total = await Towns.count();
+  const towns = await Towns.findAll(options);
+  return res.status(200).json({ data: towns, total }).end();
 }
 
 export async function destroy(req: express.Request, res: express.Response) {

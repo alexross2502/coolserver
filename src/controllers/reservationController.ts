@@ -1,4 +1,4 @@
-import { Reservation, Masters, Clients, Towns } from "../models/models";
+import { Reservation, Masters, Clients, Towns, Images } from "../models/models";
 import * as expressValidator from "express-validator";
 const { Op } = require("sequelize");
 const {
@@ -12,6 +12,23 @@ import { passwordHash } from "../utils/passwordHash";
 import { sendNewPassword } from "../utils/sendMail";
 import { createNewClient } from "../utils/createNewClient";
 import priceCalculation from "../utils/priceCalculator";
+const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const base64Img = require("base64-img");
+
+cloudinary.config({
+  cloud_name: "dzehn7px9",
+  api_key: "198777218699596",
+  api_secret: "GupoZJ9xZ8A8ev1aBbY5NltaxDQ",
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    allowed_formats: ["jpg", "png"],
+  },
+});
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
@@ -30,9 +47,23 @@ export async function getAll(req: express.Request, res: express.Response) {
   return res.status(200).json(reservation).end();
 }
 
+export async function getAllImages(
+  req: express.Request,
+  res: express.Response
+) {
+  let { id } = req.body;
+  try {
+    const images = await Images.findAll({ where: { reservation_id: id } });
+    return res.status(200).json(images).end();
+  } catch (e) {
+    return res.status(400).json({ message: "wrong data" }).end();
+  }
+}
+
 export async function destroy(req: express.Request, res: express.Response) {
   const { id } = req.params;
   const reservation = await Reservation.destroy({ where: { id: id } });
+  await Images.destroy({ where: { reservation_id: id } });
   if (reservation) {
     return res.status(200).json(reservation).end();
   } else {
@@ -162,8 +193,21 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     surname,
     rating,
     clientName,
+    image,
   } = req.body;
+  /////////
 
+  // Generate
+  // const url = cloudinary.url("olympic_flag", {
+  //   width: 100,
+  //   height: 150,
+  //   Crop: "fill",
+  // });
+
+  // The output url
+  //console.log(url);
+
+  /////////////
   try {
     //Создание нового клиента или получения id уже существующего
     let clientId = await check(clientName, recipient);
@@ -175,6 +219,9 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     if (
       (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
     ) {
+      ////////////////////
+
+      //////////////////
       const city = await Towns.findOne({
         where: { id: towns_id },
         attributes: ["tariff"],
@@ -190,7 +237,18 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         createdAt,
         updatedAt,
         price,
+        images: image.length !== 0,
       });
+      if (image.length !== 0) {
+        const reservation_id = reservation.dataValues.id;
+        for (let i = 0; i < image.length; i++) {
+          const imageBinary = base64Img.imgSync(image[i].img, "", "png");
+          const result = await cloudinary.uploader.upload(imageBinary, {
+            public_id: image[i].id,
+          });
+          await Images.create({ url: result.secure_url, reservation_id });
+        }
+      }
       //Отправка письма
       const town = await Towns.findOne({
         where: {
