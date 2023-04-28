@@ -26,12 +26,9 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    //folder: 'your_folder_name',
     allowed_formats: ["jpg", "png"],
   },
 });
-
-const upload = multer({ storage: storage });
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email) {
@@ -50,10 +47,23 @@ export async function getAll(req: express.Request, res: express.Response) {
   return res.status(200).json(reservation).end();
 }
 
+export async function getAllImages(
+  req: express.Request,
+  res: express.Response
+) {
+  let { id } = req.body;
+  try {
+    const images = await Images.findAll({ where: { reservation_id: id } });
+    return res.status(200).json(images).end();
+  } catch (e) {
+    return res.status(400).json({ message: "wrong data" }).end();
+  }
+}
+
 export async function destroy(req: express.Request, res: express.Response) {
   const { id } = req.params;
   const reservation = await Reservation.destroy({ where: { id: id } });
-  //await Images.destroy({ where: { reservation_id: id } });
+  await Images.destroy({ where: { reservation_id: id } });
   if (reservation) {
     return res.status(200).json(reservation).end();
   } else {

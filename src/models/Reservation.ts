@@ -13,7 +13,7 @@ export class Reservation extends Model {
   public clientId?: typeof DataTypes.UUID;
   public status!: typeof DataTypes.ENUM;
   public price!: typeof DataTypes.INTEGER;
-  images!: Boolean;
+  public images!: Boolean;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
