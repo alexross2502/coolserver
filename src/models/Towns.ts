@@ -1,4 +1,4 @@
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, WhereOptions } from "sequelize";
 import sequelize from "../db";
 
 export class Towns extends Model {
@@ -26,3 +26,5 @@ Towns.init(
     modelName: "towns",
   }
 );
+
+export type TownsWhereOptions = WhereOptions;
