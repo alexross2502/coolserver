@@ -194,19 +194,6 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     clientName,
     image,
   } = req.body;
-  /////////
-
-  // Generate
-  // const url = cloudinary.url("olympic_flag", {
-  //   width: 100,
-  //   height: 150,
-  //   Crop: "fill",
-  // });
-
-  // The output url
-  //console.log(url);
-
-  /////////////
   try {
     //Создание нового клиента или получения id уже существующего
     let clientId = await check(clientName, recipient);
