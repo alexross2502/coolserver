@@ -12,22 +12,16 @@ import { passwordHash } from "../utils/passwordHash";
 import { sendNewPassword } from "../utils/sendMail";
 import { createNewClient } from "../utils/createNewClient";
 import priceCalculation from "../utils/priceCalculator";
-const cloudinary = require("cloudinary").v2;
-const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const base64Img = require("base64-img");
+import { ReservationsWhereOptions } from "../models/Reservation";
+import base64Img from "base64-img";
+import { whereOptionsParser } from "../utils/whereOptionsParser";
+import { v2 as cloudinary } from "cloudinary";
+require("dotenv").config();
 
 cloudinary.config({
-  cloud_name: "dzehn7px9",
-  api_key: "198777218699596",
-  api_secret: "GupoZJ9xZ8A8ev1aBbY5NltaxDQ",
-});
-
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    allowed_formats: ["jpg", "png"],
-  },
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.cloudinary_api_key,
+  api_secret: process.env.cloudinary_api_secret,
 });
 
 //Создание нового клиента, если такой почты не существует
@@ -43,8 +37,13 @@ async function check(name, email) {
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const reservation = await Reservation.findAll();
-  return res.status(200).json(reservation).end();
+  const options: ReservationsWhereOptions = { where: {} };
+  const { offset, limit } = req.query;
+  const total = await Reservation.count();
+  const reservation = await Reservation.findAll(
+    whereOptionsParser({ options, limit, offset })
+  );
+  return res.status(200).json({ data: reservation, total }).end();
 }
 
 export async function getAllImages(

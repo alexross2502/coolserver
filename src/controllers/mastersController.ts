@@ -15,18 +15,22 @@ import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirm
 import decodingToken from "../utils/tokenDecoder";
 import { ReservationAttributes } from "../models/Reservation";
 import { MastersWhereOptions } from "../models/Masters";
+import { whereOptionsParser } from "../utils/whereOptionsParser";
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: MastersWhereOptions = {};
-  const { mailConfirmation, adminApprove } = req.query;
-  if (mailConfirmation === "true") {
-    options.mailConfirmation = true;
-  }
-  if (adminApprove === "true") {
-    options.adminApprove = true;
-  }
-  const masters = await Masters.findAll({ where: options });
-  return res.status(200).json(masters).end();
+  const options: MastersWhereOptions = { where: {} };
+  const { mailConfirmation, adminApprove, offset, limit } = req.query;
+  const total = await Masters.count();
+  const masters = await Masters.findAll(
+    whereOptionsParser({
+      options,
+      mailConfirmation,
+      adminApprove,
+      offset,
+      limit,
+    })
+  );
+  return res.status(200).json({ data: masters, total }).end();
 }
 
 export async function destroy(req: express.Request, res: express.Response) {
