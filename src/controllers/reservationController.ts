@@ -62,6 +62,13 @@ export async function getAllImages(
 export async function destroy(req: express.Request, res: express.Response) {
   const { id } = req.params;
   const reservation = await Reservation.destroy({ where: { id: id } });
+  const imagesArray = await Images.findAll({
+    where: { reservation_id: id },
+    attributes: ["public_id"],
+  });
+  imagesArray.forEach((el) => {
+    cloudinary.uploader.destroy(`${el.dataValues.public_id}`);
+  });
   await Images.destroy({ where: { reservation_id: id } });
   if (reservation) {
     return res.status(200).json(reservation).end();
