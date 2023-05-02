@@ -14,6 +14,7 @@ module.exports = {
       },
       url: { type: DataTypes.STRING, unique: true, allowNull: false },
       reservation_id: { type: DataTypes.UUID, allowNull: false },
+      public_id: { type: DataTypes.STRING, allowNull: false },
     });
     await QueryInterface.addColumn("reservations", "images", {
       type: DataTypes.BOOLEAN,

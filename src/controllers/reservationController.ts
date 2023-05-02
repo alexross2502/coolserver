@@ -13,7 +13,7 @@ import { sendNewPassword } from "../utils/sendMail";
 import { createNewClient } from "../utils/createNewClient";
 import priceCalculation from "../utils/priceCalculator";
 import { ReservationsWhereOptions } from "../models/Reservation";
-import base64Img from "base64-img";
+import * as base64Img from "base64-img";
 import { whereOptionsParser } from "../utils/whereOptionsParser";
 import { v2 as cloudinary } from "cloudinary";
 require("dotenv").config();
@@ -228,11 +228,16 @@ export async function makeOrder(req: express.Request, res: express.Response) {
       if (image.length !== 0) {
         const reservation_id = reservation.dataValues.id;
         for (let i = 0; i < image.length; i++) {
-          const imageBinary = base64Img.imgSync(image[i].img, "", "png");
+          const imageBinary = base64Img.imgSync(image[i].img, "", `png`);
           const result = await cloudinary.uploader.upload(imageBinary, {
             public_id: image[i].id,
           });
-          await Images.create({ url: result.secure_url, reservation_id });
+          console.log(result);
+          await Images.create({
+            url: result.secure_url,
+            reservation_id,
+            public_id: result.public_id,
+          });
         }
       }
       //Отправка письма
