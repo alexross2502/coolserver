@@ -52,11 +52,19 @@ export async function registration(
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: ClientsWhereOptions = {};
-  const { mailConfirmation, limit, offset } = req.query;
+  const options: ClientsWhereOptions = { where: {}, order: [] };
+  const { mailConfirmation, limit, offset, sortedField, sortingOrder } =
+    req.query;
   const total = await Clients.count();
   const clients = await Clients.findAll(
-    whereOptionsParser({ options, mailConfirmation, limit, offset })
+    whereOptionsParser({
+      options,
+      mailConfirmation,
+      limit,
+      offset,
+      sortedField,
+      sortingOrder,
+    })
   );
   return res.status(200).json({ data: clients, total }).end();
 }
