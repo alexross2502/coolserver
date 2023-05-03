@@ -24,11 +24,11 @@ export async function create(req: express.Request, res: express.Response) {
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: TownsWhereOptions = { where: {} };
-  const { offset, limit } = req.query;
+  const options: TownsWhereOptions = { where: {}, order: [] };
+  const { offset, limit, sortedField, sortingOrder } = req.query;
   const total = await Towns.count();
   const towns = await Towns.findAll(
-    whereOptionsParser({ options, limit, offset })
+    whereOptionsParser({ options, limit, offset, sortedField, sortingOrder })
   );
   return res.status(200).json({ data: towns, total }).end();
 }
