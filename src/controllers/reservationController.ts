@@ -39,6 +39,7 @@ async function check(name, email) {
 export async function getAll(req: express.Request, res: express.Response) {
   const options: ReservationsWhereOptions = {
     where: {},
+    /////
     attributes: [
       "id",
       "day",
@@ -57,10 +58,16 @@ export async function getAll(req: express.Request, res: express.Response) {
       ],
     ],
   };
+  ///////
   const { offset, limit } = req.query;
+    order: [],
+    include: [],
+  };
+  const { offset, limit, sortedField, sortingOrder } = req.query;
+  ///////
   const total = await Reservation.count();
   const reservation = await Reservation.findAll(
-    whereOptionsParser({ options, limit, offset })
+    whereOptionsParser({ options, limit, offset, sortedField, sortingOrder })
   );
   return res.status(200).json({ data: reservation, total }).end();
 }

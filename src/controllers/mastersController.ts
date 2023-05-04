@@ -1,4 +1,4 @@
-import { Users, Masters, Reservation, Clients } from "../models/models";
+import { Users, Masters, Reservation, Clients, Towns } from "../models/models";
 import * as expressValidator from "express-validator";
 import * as express from "express";
 import { passwordHash } from "../utils/passwordHash";
@@ -18,8 +18,15 @@ import { MastersWhereOptions } from "../models/Masters";
 import { whereOptionsParser } from "../utils/whereOptionsParser";
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: MastersWhereOptions = { where: {} };
-  const { mailConfirmation, adminApprove, offset, limit } = req.query;
+  const options: MastersWhereOptions = { where: {}, order: [], include: [] };
+  const {
+    mailConfirmation,
+    adminApprove,
+    offset,
+    limit,
+    sortedField,
+    sortingOrder,
+  } = req.query;
   const total = await Masters.count();
   const masters = await Masters.findAll(
     whereOptionsParser({
@@ -28,6 +35,8 @@ export async function getAll(req: express.Request, res: express.Response) {
       adminApprove,
       offset,
       limit,
+      sortedField,
+      sortingOrder,
     })
   );
   return res.status(200).json({ data: masters, total }).end();
