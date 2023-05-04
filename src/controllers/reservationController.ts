@@ -37,7 +37,26 @@ async function check(name, email) {
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: ReservationsWhereOptions = { where: {} };
+  const options: ReservationsWhereOptions = {
+    where: {},
+    attributes: [
+      "id",
+      "day",
+      "size",
+      "end",
+      "master_id",
+      "towns_id",
+      "clientId",
+      "status",
+      "price",
+      [
+        sequelize.literal(
+          "(SELECT id FROM images WHERE reservation_id = reservations.id LIMIT 1)"
+        ),
+        "images",
+      ],
+    ],
+  };
   const { offset, limit } = req.query;
   const total = await Reservation.count();
   const reservation = await Reservation.findAll(
@@ -252,7 +271,6 @@ export async function makeOrder(req: express.Request, res: express.Response) {
           createdAt,
           updatedAt,
           price,
-          images: images.length !== 0,
         },
         { transaction }
       );

@@ -17,9 +17,7 @@ module.exports = {
       public_id: { type: DataTypes.STRING, allowNull: false },
     });
     await QueryInterface.addColumn("reservations", "images", {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-      allowNull: false,
+      type: DataTypes.VIRTUAL,
     });
   },
 
