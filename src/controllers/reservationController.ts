@@ -94,6 +94,7 @@ export async function destroy(req: express.Request, res: express.Response) {
     const imagesArray = await Images.findAll({
       where: { reservation_id: id },
       attributes: ["public_id"],
+      transaction: transaction,
     });
     await Images.destroy({
       where: { reservation_id: id },
