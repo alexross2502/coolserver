@@ -32,11 +32,4 @@ Clients.init(
   }
 );
 
-export type ClientsWhereOptions = WhereOptions & {
-  id?: typeof DataTypes.UUID;
-  name?: string;
-  email?: string;
-  mailConfirmation?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
-};
+export type ClientsWhereOptions = WhereOptions;

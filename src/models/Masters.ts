@@ -48,13 +48,4 @@ Masters.init(
   }
 );
 
-export type MastersWhereOptions = WhereOptions & {
-  id?: typeof DataTypes.UUID;
-  name?: string;
-  surname?: string;
-  rating?: number;
-  townId?: typeof DataTypes.UUID;
-  email?: string;
-  mailConfirmation?: boolean;
-  adminApprove?: boolean;
-};
+export type MastersWhereOptions = WhereOptions;
