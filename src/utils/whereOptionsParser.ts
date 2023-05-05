@@ -1,5 +1,3 @@
-import sequelize from "../db";
-
 export function whereOptionsParser(params) {
   if (params.limit) {
     params.options.limit = +params.limit;
@@ -8,7 +6,7 @@ export function whereOptionsParser(params) {
     params.options.offset = +params.offset;
   }
   if (params.mailConfirmation) {
-    params.options.where.mailConfirmation = true;
+    params.options.mailConfirmation = true;
   }
   if (params.adminApprove) {
     params.options.where.adminApprove = true;

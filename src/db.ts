@@ -8,5 +8,4 @@ let sequelize = new Sequelize(
   dbCredentials.options,
   dbCredentials.ssl
 );
-
 export default sequelize;
