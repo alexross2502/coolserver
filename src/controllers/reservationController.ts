@@ -303,7 +303,7 @@ export async function makeOrder(req: express.Request, res: express.Response) {
       //Отправка письма
       const town = await Towns.findOne({
         where: {
-          id: "towns_id",
+          id: towns_id,
         },
         transaction: transaction,
       });
