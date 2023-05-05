@@ -30,5 +30,3 @@ export const AppUrlConfirmation = process.env.APP_URL_CONFIRMATION;
 export const confirmationTokenTime = 60 * 60 * 24;
 
 export const authTokenTime = 60 * 60 * 3;
-
-export const imagesExtension = ["jpg", "png", "jpeg"];
