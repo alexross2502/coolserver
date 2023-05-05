@@ -42,8 +42,6 @@ async function check(name, email, { transaction }) {
 export async function getAll(req: express.Request, res: express.Response) {
   const options: ReservationsWhereOptions = {
     where: {},
-    order: [],
-    include: [],
     attributes: [
       "id",
       "day",
@@ -62,13 +60,8 @@ export async function getAll(req: express.Request, res: express.Response) {
       ],
     ],
   };
-  const { offset, limit, sortedField, sortingOrder } = req.query;
+  const { offset, limit } = req.query;
   const total = await Reservation.count();
-  console.log(sortedField, sortingOrder, "in controller");
-  console.log(
-    { options, limit, offset, sortedField, sortingOrder },
-    "in controller"
-  );
   const reservation = await Reservation.findAll(
     whereOptionsParser({ options, limit, offset })
   );
