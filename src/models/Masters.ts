@@ -1,6 +1,5 @@
 import { Model, DataTypes, WhereOptions } from "sequelize";
 import sequelize from "../db";
-import { Towns } from "./Towns";
 
 export class Masters extends Model {
   public id!: typeof DataTypes.UUID;
@@ -48,7 +47,5 @@ Masters.init(
     modelName: "masters",
   }
 );
-
-Masters.belongsTo(Towns, { foreignKey: "townId" });
 
 export type MastersWhereOptions = WhereOptions;

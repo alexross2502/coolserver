@@ -1,8 +1,8 @@
 import { Model, DataTypes, WhereOptions } from "sequelize";
 import sequelize from "../db";
+import { Clients } from "./Clients";
+import { Masters } from "./Masters";
 import { Images } from "./Images";
-import { Clients, Masters, Towns } from "./models";
-
 
 export class Reservation extends Model {
   public id!: typeof DataTypes.UUID;
@@ -71,6 +71,5 @@ Reservation.init(
 
 Reservation.belongsTo(Clients, { foreignKey: "clientId" });
 Reservation.belongsTo(Masters, { foreignKey: "master_id" });
-Reservation.belongsTo(Towns, { foreignKey: "towns_id" });
 
 export type ReservationsWhereOptions = WhereOptions;
