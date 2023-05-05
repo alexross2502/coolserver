@@ -1,3 +1,5 @@
+import sequelize from "../db";
+
 export function whereOptionsParser(params) {
   if (params.limit) {
     params.options.limit = +params.limit;
