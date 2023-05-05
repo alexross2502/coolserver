@@ -1,6 +1,6 @@
 import sequelize from "../db";
 
-export function whereOptionsParser(params) {
+export function requestOptionsParser(params) {
   if (params.limit) {
     params.options.limit = +params.limit;
   }

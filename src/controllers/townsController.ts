@@ -1,7 +1,7 @@
 import * as expressValidator from "express-validator";
 import { Towns, TownsWhereOptions } from "../models/Towns";
 import * as express from "express";
-import { whereOptionsParser } from "../utils/whereOptionsParser";
+import { requestOptionsParser } from "../utils/requestOptionsParser";
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -24,13 +24,23 @@ export async function create(req: express.Request, res: express.Response) {
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: TownsWhereOptions = { where: {}, order: [] };
-  const { offset, limit, sortedField, sortingOrder } = req.query;
-  const total = await Towns.count();
-  const towns = await Towns.findAll(
-    whereOptionsParser({ options, limit, offset, sortedField, sortingOrder })
-  );
-  return res.status(200).json({ data: towns, total }).end();
+  try {
+    const options: TownsWhereOptions = { where: {}, order: [] };
+    const { offset, limit, sortedField, sortingOrder } = req.query;
+    const total = await Towns.count();
+    const towns = await Towns.findAll(
+      requestOptionsParser({
+        options,
+        limit,
+        offset,
+        sortedField,
+        sortingOrder,
+      })
+    );
+    return res.status(200).json({ data: towns, total }).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
 }
 
 export async function destroy(req: express.Request, res: express.Response) {

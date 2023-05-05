@@ -14,7 +14,7 @@ import { createNewClient } from "../utils/createNewClient";
 import priceCalculation from "../utils/priceCalculator";
 import { ReservationsWhereOptions } from "../models/Reservation";
 import * as base64Img from "base64-img";
-import { whereOptionsParser } from "../utils/whereOptionsParser";
+import { requestOptionsParser } from "../utils/requestOptionsParser";
 import { v2 as cloudinary } from "cloudinary";
 import sequelize from "../db";
 
@@ -26,48 +26,62 @@ cloudinary.config({
 
 //Создание нового клиента, если такой почты не существует
 async function check(name, email, { transaction }) {
-  let newPassword = generateRandomPassword();
-  let hashedPassword = await passwordHash(newPassword);
-  let created = await createNewClient(name, email, hashedPassword, false);
-  if (created) {
-    sendNewPassword(email, newPassword);
+  try {
+    let newPassword = generateRandomPassword();
+    let hashedPassword = await passwordHash(newPassword);
+    let created = await createNewClient(name, email, hashedPassword, false);
+    if (created) {
+      sendNewPassword(email, newPassword);
+    }
+    let client = await Clients.findOne({
+      where: { email },
+      transaction: transaction,
+    });
+    return client.dataValues.id;
+  } catch (e) {
+    throw new Error("client create or find error");
   }
-  let client = await Clients.findOne({
-    where: { email },
-    transaction: transaction,
-  });
-  return client.dataValues.id;
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: ReservationsWhereOptions = {
-    where: {},
-    order: [],
-    include: [],
-    attributes: [
-      "id",
-      "day",
-      "size",
-      "end",
-      "master_id",
-      "towns_id",
-      "clientId",
-      "status",
-      "price",
-      [
-        sequelize.literal(
-          "(SELECT id FROM images WHERE reservation_id = reservations.id LIMIT 1)"
-        ),
-        "images",
+  try {
+    const options: ReservationsWhereOptions = {
+      where: {},
+      order: [],
+      include: [],
+      attributes: [
+        "id",
+        "day",
+        "size",
+        "end",
+        "master_id",
+        "towns_id",
+        "clientId",
+        "status",
+        "price",
+        [
+          sequelize.literal(
+            "(SELECT id FROM images WHERE reservation_id = reservations.id LIMIT 1)"
+          ),
+          "images",
+        ],
       ],
-    ],
-  };
-  const { offset, limit, sortedField, sortingOrder } = req.query;
-  const total = await Reservation.count();
-  const reservation = await Reservation.findAll(
-    whereOptionsParser({ options, limit, offset, sortedField, sortingOrder })
-  );
-  return res.status(200).json({ data: reservation, total }).end();
+    };
+    const { offset, limit, sortedField, sortingOrder } = req.query;
+    const total = await Reservation.count();
+    const reservation = await Reservation.findAll(
+      requestOptionsParser({
+        options,
+        limit,
+        offset,
+        sortedField,
+        sortingOrder,
+      })
+    );
+    return res.status(200).json({ data: reservation, total }).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
 }
 
 export async function getAllImages(
