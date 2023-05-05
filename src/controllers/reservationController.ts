@@ -25,14 +25,17 @@ cloudinary.config({
 });
 
 //Создание нового клиента, если такой почты не существует
-async function check(name, email) {
+async function check(name, email, { transaction }) {
   let newPassword = generateRandomPassword();
   let hashedPassword = await passwordHash(newPassword);
   let created = await createNewClient(name, email, hashedPassword, false);
   if (created) {
     sendNewPassword(email, newPassword);
   }
-  let client = await Clients.findOne({ where: { email } });
+  let client = await Clients.findOne({
+    where: { email },
+    transaction: transaction,
+  });
   return client.dataValues.id;
 }
 
@@ -250,21 +253,21 @@ export async function makeOrder(req: express.Request, res: express.Response) {
   let transaction = await sequelize.transaction();
   try {
     //Создание нового клиента или получения id уже существующего
-    let clientId = await check(clientName, recipient);
+    let clientId = await check(clientName, recipient, { transaction });
     let createdAt = Date.now();
     let updatedAt = Date.now();
     let start = new Date(+day);
     let end = new Date(+day + constants.timeSize[size] * 3600 * 1000);
     day = new Date(+day);
     if (
-      (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
+      (await reservationDuplicationCheck(towns_id, master_id, start, end, {
+        transaction,
+      })) === 0
     ) {
-      ////////////////////
-
-      //////////////////
       const city = await Towns.findOne({
         where: { id: towns_id },
         attributes: ["tariff"],
+        transaction: transaction,
       });
       const price = await priceCalculation(city.dataValues.tariff, size);
       const reservation = await Reservation.create(
@@ -293,11 +296,14 @@ export async function makeOrder(req: express.Request, res: express.Response) {
           const result = await cloudinary.uploader.upload(imageBinary, {
             public_id: images[i].id,
           });
-          await Images.create({
-            url: result.secure_url,
-            reservation_id,
-            public_id: result.public_id,
-          });
+          await Images.create(
+            {
+              url: result.secure_url,
+              reservation_id,
+              public_id: result.public_id,
+            },
+            { transaction }
+          );
         }
       }
       //Отправка письма
@@ -305,6 +311,7 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         where: {
           id: towns_id,
         },
+        transaction: transaction,
       });
       sendClientOrderMail(
         recipient,
