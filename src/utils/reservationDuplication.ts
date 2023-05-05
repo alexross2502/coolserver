@@ -5,8 +5,7 @@ async function reservationDuplicationCheck(
   towns_id: string,
   master_id: string,
   start: Date,
-  end: Date,
-  { transaction }
+  end: Date
 ): Promise<number> {
   let duplication = await Reservation.count({
     where: {
@@ -47,7 +46,6 @@ async function reservationDuplicationCheck(
         },
       ],
     },
-    transaction,
   });
   return duplication;
 }
