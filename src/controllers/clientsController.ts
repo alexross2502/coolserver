@@ -13,6 +13,7 @@ import { Sequelize } from "sequelize";
 import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
 import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
 import { ClientsWhereOptions } from "../models/Clients";
+import { whereOptionsParser } from "../utils/whereOptionsParser";
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -51,15 +52,21 @@ export async function registration(
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: ClientsWhereOptions = {};
-  const { mailConfirmation } = req.query;
-  if (mailConfirmation === "true") {
-    options.mailConfirmation = true;
-  }
-  const clients = await Clients.findAll({
-    where: options,
-  });
-  return res.status(200).json(clients).end();
+  const options: ClientsWhereOptions = { where: {}, order: [] };
+  const { mailConfirmation, limit, offset, sortedField, sortingOrder } =
+    req.query;
+  const total = await Clients.count();
+  const clients = await Clients.findAll(
+    whereOptionsParser({
+      options,
+      mailConfirmation,
+      limit,
+      offset,
+      sortedField,
+      sortingOrder,
+    })
+  );
+  return res.status(200).json({ data: clients, total }).end();
 }
 
 export async function destroy(req: express.Request, res: express.Response) {

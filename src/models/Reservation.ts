@@ -1,7 +1,8 @@
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, WhereOptions } from "sequelize";
 import sequelize from "../db";
-import { Clients } from "./Clients";
-import { Masters } from "./Masters";
+import { Images } from "./Images";
+import { Clients, Masters, Towns } from "./models";
+
 
 export class Reservation extends Model {
   public id!: typeof DataTypes.UUID;
@@ -13,7 +14,7 @@ export class Reservation extends Model {
   public clientId?: typeof DataTypes.UUID;
   public status!: typeof DataTypes.ENUM;
   public price!: typeof DataTypes.INTEGER;
-  public images!: Boolean;
+  public images?: typeof DataTypes.VIRTUAL;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -29,7 +30,7 @@ export interface ReservationAttributes {
   clientId?: typeof DataTypes.UUID;
   status?: typeof DataTypes.ENUM;
   price?: typeof DataTypes.INTEGER;
-  images?: Boolean;
+  images?: typeof DataTypes.VIRTUAL;
 }
 
 Reservation.init(
@@ -58,7 +59,9 @@ Reservation.init(
       allowNull: false,
     },
     price: { type: DataTypes.INTEGER, allowNull: false },
-    images: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
+    images: {
+      type: DataTypes.VIRTUAL,
+    },
   },
   {
     sequelize,
@@ -68,3 +71,6 @@ Reservation.init(
 
 Reservation.belongsTo(Clients, { foreignKey: "clientId" });
 Reservation.belongsTo(Masters, { foreignKey: "master_id" });
+Reservation.belongsTo(Towns, { foreignKey: "towns_id" });
+
+export type ReservationsWhereOptions = WhereOptions;

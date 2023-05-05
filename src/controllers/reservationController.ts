@@ -12,22 +12,16 @@ import { passwordHash } from "../utils/passwordHash";
 import { sendNewPassword } from "../utils/sendMail";
 import { createNewClient } from "../utils/createNewClient";
 import priceCalculation from "../utils/priceCalculator";
-const cloudinary = require("cloudinary").v2;
-const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const base64Img = require("base64-img");
+import { ReservationsWhereOptions } from "../models/Reservation";
+import * as base64Img from "base64-img";
+import { whereOptionsParser } from "../utils/whereOptionsParser";
+import { v2 as cloudinary } from "cloudinary";
+import sequelize from "../db";
 
 cloudinary.config({
-  cloud_name: "dzehn7px9",
-  api_key: "198777218699596",
-  api_secret: "GupoZJ9xZ8A8ev1aBbY5NltaxDQ",
-});
-
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    allowed_formats: ["jpg", "png"],
-  },
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.cloudinary_api_key,
+  api_secret: process.env.cloudinary_api_secret,
 });
 
 //Создание нового клиента, если такой почты не существует
@@ -43,8 +37,39 @@ async function check(name, email) {
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const reservation = await Reservation.findAll();
-  return res.status(200).json(reservation).end();
+  const options: ReservationsWhereOptions = {
+    where: {},
+    order: [],
+    include: [],
+    attributes: [
+      "id",
+      "day",
+      "size",
+      "end",
+      "master_id",
+      "towns_id",
+      "clientId",
+      "status",
+      "price",
+      [
+        sequelize.literal(
+          "(SELECT id FROM images WHERE reservation_id = reservations.id LIMIT 1)"
+        ),
+        "images",
+      ],
+    ],
+  };
+  const { offset, limit, sortedField, sortingOrder } = req.query;
+  const total = await Reservation.count();
+  console.log(sortedField, sortingOrder, "in controller");
+  console.log(
+    { options, limit, offset, sortedField, sortingOrder },
+    "in controller"
+  );
+  const reservation = await Reservation.findAll(
+    whereOptionsParser({ options, limit, offset, sortedField, sortingOrder })
+  );
+  return res.status(200).json({ data: reservation, total }).end();
 }
 
 export async function getAllImages(
@@ -61,13 +86,40 @@ export async function getAllImages(
 }
 
 export async function destroy(req: express.Request, res: express.Response) {
-  const { id } = req.params;
-  const reservation = await Reservation.destroy({ where: { id: id } });
-  await Images.destroy({ where: { reservation_id: id } });
-  if (reservation) {
-    return res.status(200).json(reservation).end();
-  } else {
-    return res.status(400).json({ message: "wrong data" }).end();
+  let transaction = await sequelize.transaction();
+  try {
+    const { id } = req.params;
+    const reservation = await Reservation.destroy({
+      where: { id: id },
+      transaction: transaction,
+    });
+    const imagesArray = await Images.findAll({
+      where: { reservation_id: id },
+      attributes: ["public_id"],
+    });
+    await Images.destroy({
+      where: { reservation_id: id },
+      transaction: transaction,
+    });
+    for (const el of imagesArray) {
+      let deletedImages = await cloudinary.uploader.destroy(
+        `${el.dataValues.public_id}`
+      );
+      if (deletedImages.result !== "ok") {
+        throw new Error("image deletion error");
+      }
+    }
+    if (reservation) {
+      await transaction.commit();
+      return res.status(200).json(reservation).end();
+    } else {
+      throw new Error("error");
+    }
+  } catch (e) {
+    if (transaction) {
+      await transaction.rollback();
+    }
+    return res.status(400).json({ message: e.message }).end();
   }
 }
 
@@ -193,21 +245,9 @@ export async function makeOrder(req: express.Request, res: express.Response) {
     surname,
     rating,
     clientName,
-    image,
+    images,
   } = req.body;
-  /////////
-
-  // Generate
-  // const url = cloudinary.url("olympic_flag", {
-  //   width: 100,
-  //   height: 150,
-  //   Crop: "fill",
-  // });
-
-  // The output url
-  //console.log(url);
-
-  /////////////
+  let transaction = await sequelize.transaction();
   try {
     //Создание нового клиента или получения id уже существующего
     let clientId = await check(clientName, recipient);
@@ -227,26 +267,37 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         attributes: ["tariff"],
       });
       const price = await priceCalculation(city.dataValues.tariff, size);
-      const reservation = await Reservation.create({
-        day,
-        end,
-        size,
-        master_id,
-        towns_id,
-        clientId,
-        createdAt,
-        updatedAt,
-        price,
-        images: image.length !== 0,
-      });
-      if (image.length !== 0) {
+      const reservation = await Reservation.create(
+        {
+          day,
+          end,
+          size,
+          master_id,
+          towns_id,
+          clientId,
+          createdAt,
+          updatedAt,
+          price,
+        },
+        { transaction }
+      );
+      if (images.length !== 0) {
         const reservation_id = reservation.dataValues.id;
-        for (let i = 0; i < image.length; i++) {
-          const imageBinary = base64Img.imgSync(image[i].img, "", "png");
+        for (let i = 0; i < images.length; i++) {
+          const imageBinary = base64Img.imgSync(images[i].img, "");
+          const matches = images[i].img.match(/^data:image\/([a-z]+);base64,/i);
+          const extension = matches[1];
+          if (!constants.imagesExtension.includes(extension)) {
+            throw new Error("wrong extension");
+          }
           const result = await cloudinary.uploader.upload(imageBinary, {
-            public_id: image[i].id,
+            public_id: images[i].id,
           });
-          await Images.create({ url: result.secure_url, reservation_id });
+          await Images.create({
+            url: result.secure_url,
+            reservation_id,
+            public_id: result.public_id,
+          });
         }
       }
       //Отправка письма
@@ -264,11 +315,15 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         size,
         town.dataValues.name
       );
+      await transaction.commit();
       return res.status(200).json(reservation).end();
     } else {
       throw new Error("error");
     }
   } catch (e) {
+    if (transaction) {
+      await transaction.rollback();
+    }
     return res.status(400).json({ message: e.message }).end();
   }
 }
