@@ -64,11 +64,6 @@ export async function getAll(req: express.Request, res: express.Response) {
   };
   const { offset, limit, sortedField, sortingOrder } = req.query;
   const total = await Reservation.count();
-  console.log(sortedField, sortingOrder, "in controller");
-  console.log(
-    { options, limit, offset, sortedField, sortingOrder },
-    "in controller"
-  );
   const reservation = await Reservation.findAll(
     whereOptionsParser({ options, limit, offset, sortedField, sortingOrder })
   );
