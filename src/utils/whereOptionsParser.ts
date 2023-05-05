@@ -15,7 +15,7 @@ export function whereOptionsParser(params) {
   }
   if (
     params.sortedField &&
-    params.sortedField.includes(["towns", "masters", "clients"])
+    ["towns", "masters", "clients"].includes(params.sortedField)
   ) {
     const sortedModel = sequelize.model(params.sortedField);
     params.options.order.push([sortedModel, "name", params.sortingOrder]);
