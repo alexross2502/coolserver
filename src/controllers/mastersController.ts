@@ -1,4 +1,4 @@
-import { Users, Masters, Reservation, Clients } from "../models/models";
+import { Users, Masters, Reservation, Clients, Towns } from "../models/models";
 import * as expressValidator from "express-validator";
 import * as express from "express";
 import { passwordHash } from "../utils/passwordHash";
@@ -15,22 +15,35 @@ import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirm
 import decodingToken from "../utils/tokenDecoder";
 import { ReservationAttributes } from "../models/Reservation";
 import { MastersWhereOptions } from "../models/Masters";
-import { whereOptionsParser } from "../utils/whereOptionsParser";
+import { requestOptionsParser } from "../utils/requestOptionsParser";
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: MastersWhereOptions = { where: {} };
-  const { mailConfirmation, adminApprove, offset, limit } = req.query;
-  const total = await Masters.count();
-  const masters = await Masters.findAll(
-    whereOptionsParser({
-      options,
+  try {
+    const options: MastersWhereOptions = { where: {}, order: [], include: [] };
+    const {
       mailConfirmation,
       adminApprove,
       offset,
       limit,
-    })
-  );
-  return res.status(200).json({ data: masters, total }).end();
+      sortedField,
+      sortingOrder,
+    } = req.query;
+    const total = await Masters.count();
+    const masters = await Masters.findAll(
+      requestOptionsParser({
+        options,
+        mailConfirmation,
+        adminApprove,
+        offset,
+        limit,
+        sortedField,
+        sortingOrder,
+      })
+    );
+    return res.status(200).json({ data: masters, total }).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
 }
 
 export async function destroy(req: express.Request, res: express.Response) {

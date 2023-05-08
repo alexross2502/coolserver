@@ -13,7 +13,7 @@ import { Sequelize } from "sequelize";
 import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
 import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
 import { ClientsWhereOptions } from "../models/Clients";
-import { whereOptionsParser } from "../utils/whereOptionsParser";
+import { requestOptionsParser } from "../utils/requestOptionsParser";
 
 export async function create(req: express.Request, res: express.Response) {
   try {
@@ -52,13 +52,25 @@ export async function registration(
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: ClientsWhereOptions = {};
-  const { mailConfirmation, limit, offset } = req.query;
-  const total = await Clients.count();
-  const clients = await Clients.findAll(
-    whereOptionsParser({ options, mailConfirmation, limit, offset })
-  );
-  return res.status(200).json({ data: clients, total }).end();
+  try {
+    const options: ClientsWhereOptions = { where: {}, order: [] };
+    const { mailConfirmation, limit, offset, sortedField, sortingOrder } =
+      req.query;
+    const total = await Clients.count();
+    const clients = await Clients.findAll(
+      requestOptionsParser({
+        options,
+        mailConfirmation,
+        limit,
+        offset,
+        sortedField,
+        sortingOrder,
+      })
+    );
+    return res.status(200).json({ data: clients, total }).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
 }
 
 export async function destroy(req: express.Request, res: express.Response) {
