@@ -27,8 +27,18 @@ export async function getAll(req: express.Request, res: express.Response) {
       limit,
       sortedField,
       sortingOrder,
+      nameFilterValue,
+      surnameFilterValue,
     } = req.query;
-    const total = await Masters.count();
+    const total = await Masters.count(
+      requestOptionsParser({
+        options,
+        mailConfirmation,
+        adminApprove,
+        nameFilterValue,
+        surnameFilterValue,
+      })
+    );
     const masters = await Masters.findAll(
       requestOptionsParser({
         options,

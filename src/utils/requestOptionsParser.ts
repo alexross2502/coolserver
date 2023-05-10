@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import sequelize from "../db";
 
 export function requestOptionsParser(params) {
@@ -12,6 +13,16 @@ export function requestOptionsParser(params) {
   }
   if (params.adminApprove) {
     params.options.where.adminApprove = true;
+  }
+  if (params.nameFilterValue && params.nameFilterValue !== "") {
+    params.options.where.name = {
+      [Op.like]: `%${params.nameFilterValue}%`,
+    };
+  }
+  if (params.surnameFilterValue && params.surnameFilterValue !== "") {
+    params.options.where.surname = {
+      [Op.like]: `%${params.surnameFilterValue}%`,
+    };
   }
   if (
     params.sortedField &&
