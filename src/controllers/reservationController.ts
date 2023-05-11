@@ -67,7 +67,17 @@ export async function getAll(req: express.Request, res: express.Response) {
         ],
       ],
     };
-    const { offset, limit, sortedField, sortingOrder } = req.query;
+    const {
+      offset,
+      limit,
+      sortedField,
+      sortingOrder,
+      town,
+      master,
+      start,
+      end,
+      status,
+    } = req.query;
     const total = await Reservation.count();
     const reservation = await Reservation.findAll(
       requestOptionsParser({
@@ -76,6 +86,11 @@ export async function getAll(req: express.Request, res: express.Response) {
         offset,
         sortedField,
         sortingOrder,
+        town,
+        master,
+        start,
+        end,
+        status,
       })
     );
     return res.status(200).json({ data: reservation, total }).end();
