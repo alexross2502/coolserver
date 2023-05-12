@@ -31,6 +31,14 @@ export function requestOptionsParser(params) {
   if (params.end) {
     params.options.where.end = {
       [Op.lt]: +params.end,
+  if (params.nameFilterValue && params.nameFilterValue !== "") {
+    params.options.where.name = {
+      [Op.like]: `%${params.nameFilterValue}%`,
+    };
+  }
+  if (params.surnameFilterValue && params.surnameFilterValue !== "") {
+    params.options.where.surname = {
+      [Op.like]: `%${params.surnameFilterValue}%`,
     };
   }
   if (
