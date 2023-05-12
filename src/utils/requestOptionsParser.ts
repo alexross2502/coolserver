@@ -25,12 +25,12 @@ export function requestOptionsParser(params) {
   }
   if (params.start) {
     params.options.where.day = {
-      [Op.gt]: params.start,
+      [Op.gt]: +params.start,
     };
   }
   if (params.end) {
     params.options.where.end = {
-      [Op.lt]: params.end,
+      [Op.lt]: +params.end,
     };
   }
   if (
