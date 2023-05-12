@@ -67,8 +67,32 @@ export async function getAll(req: express.Request, res: express.Response) {
         ],
       ],
     };
-    const { offset, limit, sortedField, sortingOrder } = req.query;
-    const total = await Reservation.count();
+    const countOptions: ReservationsWhereOptions = {
+      where: {},
+      order: [],
+      include: [],
+    };
+    const {
+      offset,
+      limit,
+      sortedField,
+      sortingOrder,
+      town,
+      master,
+      start,
+      end,
+      status,
+    } = req.query;
+    const total = await Reservation.count(
+      requestOptionsParser({
+        options: countOptions,
+        town,
+        master,
+        start,
+        end,
+        status,
+      })
+    );
     const reservation = await Reservation.findAll(
       requestOptionsParser({
         options,
@@ -76,6 +100,11 @@ export async function getAll(req: express.Request, res: express.Response) {
         offset,
         sortedField,
         sortingOrder,
+        town,
+        master,
+        start,
+        end,
+        status,
       })
     );
     return res.status(200).json({ data: reservation, total }).end();
