@@ -14,7 +14,7 @@ import { createNewClient } from "../utils/createNewClient";
 import priceCalculation from "../utils/priceCalculator";
 import { ReservationsWhereOptions } from "../models/Reservation";
 import * as base64Img from "base64-img";
-import { whereOptionsParser } from "../utils/whereOptionsParser";
+import { requestOptionsParser } from "../utils/requestOptionsParser";
 import { v2 as cloudinary } from "cloudinary";
 import sequelize from "../db";
 
@@ -25,51 +25,92 @@ cloudinary.config({
 });
 
 //Создание нового клиента, если такой почты не существует
-async function check(name, email) {
-  let newPassword = generateRandomPassword();
-  let hashedPassword = await passwordHash(newPassword);
-  let created = await createNewClient(name, email, hashedPassword, false);
-  if (created) {
-    sendNewPassword(email, newPassword);
+async function check(name, email, { transaction }) {
+  try {
+    let newPassword = generateRandomPassword();
+    let hashedPassword = await passwordHash(newPassword);
+    let created = await createNewClient(name, email, hashedPassword, false);
+    if (created) {
+      sendNewPassword(email, newPassword);
+    }
+    let client = await Clients.findOne({
+      where: { email },
+      transaction: transaction,
+    });
+    return client.dataValues.id;
+  } catch (e) {
+    throw new Error("client create or find error");
   }
-  let client = await Clients.findOne({ where: { email } });
-  return client.dataValues.id;
 }
 
 export async function getAll(req: express.Request, res: express.Response) {
-  const options: ReservationsWhereOptions = {
-    where: {},
-    order: [],
-    include: [],
-    attributes: [
-      "id",
-      "day",
-      "size",
-      "end",
-      "master_id",
-      "towns_id",
-      "clientId",
-      "status",
-      "price",
-      [
-        sequelize.literal(
-          "(SELECT id FROM images WHERE reservation_id = reservations.id LIMIT 1)"
-        ),
-        "images",
+  try {
+    const options: ReservationsWhereOptions = {
+      where: {},
+      order: [],
+      include: [],
+      attributes: [
+        "id",
+        "day",
+        "size",
+        "end",
+        "master_id",
+        "towns_id",
+        "clientId",
+        "status",
+        "price",
+        [
+          sequelize.literal(
+            "(SELECT id FROM images WHERE reservation_id = reservations.id LIMIT 1)"
+          ),
+          "images",
+        ],
       ],
-    ],
-  };
-  const { offset, limit, sortedField, sortingOrder } = req.query;
-  const total = await Reservation.count();
-  console.log(sortedField, sortingOrder, "in controller");
-  console.log(
-    { options, limit, offset, sortedField, sortingOrder },
-    "in controller"
-  );
-  const reservation = await Reservation.findAll(
-    whereOptionsParser({ options, limit, offset, sortedField, sortingOrder })
-  );
-  return res.status(200).json({ data: reservation, total }).end();
+    };
+    const countOptions: ReservationsWhereOptions = {
+      where: {},
+      order: [],
+      include: [],
+    };
+    const {
+      offset,
+      limit,
+      sortedField,
+      sortingOrder,
+      town,
+      master,
+      start,
+      end,
+      status,
+    } = req.query;
+    const total = await Reservation.count(
+      requestOptionsParser({
+        options: countOptions,
+        town,
+        master,
+        start,
+        end,
+        status,
+      })
+    );
+    const reservation = await Reservation.findAll(
+      requestOptionsParser({
+        options,
+        limit,
+        offset,
+        sortedField,
+        sortingOrder,
+        town,
+        master,
+        start,
+        end,
+        status,
+      })
+    );
+    return res.status(200).json({ data: reservation, total }).end();
+  } catch (e) {
+    return res.status(400).json({ message: e.message }).end();
+  }
 }
 
 export async function getAllImages(
@@ -96,6 +137,7 @@ export async function destroy(req: express.Request, res: express.Response) {
     const imagesArray = await Images.findAll({
       where: { reservation_id: id },
       attributes: ["public_id"],
+      transaction: transaction,
     });
     await Images.destroy({
       where: { reservation_id: id },
@@ -250,21 +292,21 @@ export async function makeOrder(req: express.Request, res: express.Response) {
   let transaction = await sequelize.transaction();
   try {
     //Создание нового клиента или получения id уже существующего
-    let clientId = await check(clientName, recipient);
+    let clientId = await check(clientName, recipient, { transaction });
     let createdAt = Date.now();
     let updatedAt = Date.now();
     let start = new Date(+day);
     let end = new Date(+day + constants.timeSize[size] * 3600 * 1000);
     day = new Date(+day);
     if (
-      (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
+      (await reservationDuplicationCheck(towns_id, master_id, start, end, {
+        transaction,
+      })) === 0
     ) {
-      ////////////////////
-
-      //////////////////
       const city = await Towns.findOne({
         where: { id: towns_id },
         attributes: ["tariff"],
+        transaction: transaction,
       });
       const price = await priceCalculation(city.dataValues.tariff, size);
       const reservation = await Reservation.create(
@@ -293,11 +335,14 @@ export async function makeOrder(req: express.Request, res: express.Response) {
           const result = await cloudinary.uploader.upload(imageBinary, {
             public_id: images[i].id,
           });
-          await Images.create({
-            url: result.secure_url,
-            reservation_id,
-            public_id: result.public_id,
-          });
+          await Images.create(
+            {
+              url: result.secure_url,
+              reservation_id,
+              public_id: result.public_id,
+            },
+            { transaction }
+          );
         }
       }
       //Отправка письма
@@ -305,6 +350,7 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         where: {
           id: towns_id,
         },
+        transaction: transaction,
       });
       sendClientOrderMail(
         recipient,
