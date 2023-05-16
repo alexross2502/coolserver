@@ -36,7 +36,7 @@ router.post(
   "/images",
   [
     passport.authenticate("jwt", { session: false }),
-    combinedMiddleware(["admin"]),
+    combinedMiddleware(["admin", "master"]),
   ],
   reservationController.getAllImages
 );
