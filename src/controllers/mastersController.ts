@@ -8,7 +8,7 @@ import {
   sendNewPassword,
 } from "../utils/sendMail";
 import { generateRandomPassword } from "../utils/generateRandomPassword";
-import { createMaster } from "../utils/createNewMaster";
+import { createNewMaster } from "../utils/createNewMaster";
 import { Op, Sequelize } from "sequelize";
 import handlingTokenForEmailConfirmation from "../utils/handlingTokenForEmailConfirmation";
 import createTokenForEmailConfirmation from "../utils/createTokenForEmailConfirmation";
@@ -16,6 +16,7 @@ import decodingToken from "../utils/tokenDecoder";
 import { ReservationAttributes } from "../models/Reservation";
 import { MastersWhereOptions } from "../models/Masters";
 import { requestOptionsParser } from "../utils/requestOptionsParser";
+import sequelize from "../db";
 
 export async function getAll(req: express.Request, res: express.Response) {
   try {
@@ -100,7 +101,7 @@ export async function registration(
       throw new Error("Validator's error");
     }
     const { name, surname, townId, password, email } = req.body;
-    const master = await createMaster(
+    const master = await createNewMaster(
       name,
       surname,
       5,
@@ -127,10 +128,10 @@ export async function create(req: express.Request, res: express.Response) {
       throw new Error("Validator's error");
     }
     const { name, surname, rating, townId, password, email } = req.body;
-    const master = await createMaster(
+    const master = await createNewMaster(
       name,
       surname,
-      rating,
+      5,
       townId,
       email,
       password,
@@ -155,13 +156,31 @@ export async function mastersAccountData(req, res) {
       where: {
         master_id: masterId,
       },
-      attributes: ["id", "size", "day", "end", "clientId", "price", "status"],
+      attributes: [
+        "id",
+        "size",
+        "day",
+        "end",
+        "clientId",
+        "price",
+        "status",
+        [
+          sequelize.literal(
+            "(SELECT id FROM images WHERE reservation_id = reservations.id LIMIT 1)"
+          ),
+          "images",
+        ],
+      ],
       include: {
         model: Clients,
-        where: {
-          id: Sequelize.col("reservations.clientId"),
-        },
-        attributes: ["name"],
+        attributes: [
+          [
+            sequelize.literal(
+              "(SELECT name FROM clients WHERE clients.id = reservations.clientId LIMIT 1)"
+            ),
+            "name",
+          ],
+        ],
       },
     });
     return res.status(200).json({ data }).end();
@@ -190,10 +209,10 @@ export async function mailConfirmation(
 ) {
   try {
     const id = handlingTokenForEmailConfirmation(req.params.id);
-    const masterId = decodingToken(req.headers.authorization);
     await Masters.update({ mailConfirmation: true }, { where: { id } });
-    return res.status(200).json().end();
+    return res.status(200).json(true).end();
   } catch (e) {
+    console.log(e);
     return res.status(400).json({ message: e.message }).end();
   }
 }
