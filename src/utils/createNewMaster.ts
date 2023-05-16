@@ -1,7 +1,7 @@
 import { Users, Masters } from "../models/models";
 import { passwordHash } from "./passwordHash";
 
-export async function createMaster(
+export async function createNewMaster(
   name,
   surname,
   rating,
