@@ -212,7 +212,6 @@ export async function mailConfirmation(
     await Masters.update({ mailConfirmation: true }, { where: { id } });
     return res.status(200).json(true).end();
   } catch (e) {
-    console.log(e);
     return res.status(400).json({ message: e.message }).end();
   }
 }
