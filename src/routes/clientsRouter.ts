@@ -48,5 +48,13 @@ router.get(
   clientsController.clientsAccountData
 );
 router.get("/mailconfirmation/:id", clientsController.mailConfirmation);
+router.get(
+  "/prefill",
+  [
+    passport.authenticate("jwt", { session: false }),
+    combinedMiddleware(["client"]),
+  ],
+  clientsController.orderPrefillData
+);
 
 module.exports = router;
