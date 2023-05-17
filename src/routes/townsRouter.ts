@@ -24,4 +24,4 @@ router.delete(
   townsController.destroy
 );
 
-module.exports = router;
+export default router;

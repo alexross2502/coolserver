@@ -6,4 +6,4 @@ const router: express.Router = express.Router();
 router.post("/", adminController.check);
 router.post("/add", adminDataValidate, adminController.create);
 
-module.exports = router;
+export default router;

@@ -49,4 +49,4 @@ router.get(
 );
 router.get("/mailconfirmation/:id", clientsController.mailConfirmation);
 
-module.exports = router;
+export default router;

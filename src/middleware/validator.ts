@@ -14,14 +14,14 @@ export const clientDataValidate = [
     .isString()
     .withMessage("Email must be a string")
     .isEmail()
-    .withMessage("Email wrong format"), 
+    .withMessage("Email wrong format"),
   body("password")
     .exists()
     .withMessage("Password required")
     .isString()
     .withMessage("Password must be a string")
     .isLength({ min: 3 })
-    .withMessage("Password must be at least 3 characters long")
+    .withMessage("Password must be at least 3 characters long"),
 ];
 
 export const adminDataValidate = [
@@ -56,13 +56,6 @@ export const masterDataValidate = [
     .withMessage("Surname must be a string")
     .isLength({ min: 3 })
     .withMessage("Surname must be at least 3 characters long"),
-  body("rating")
-    .exists()
-    .withMessage("Rating required")
-    .isNumeric()
-    .withMessage("Rating must be a number")
-    .isInt({ min: 1, max: 5 })
-    .withMessage("Master rating must be in range 1-5"),
   body("townId")
     .exists()
     .withMessage("Town required")

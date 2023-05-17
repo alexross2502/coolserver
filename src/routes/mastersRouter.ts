@@ -69,4 +69,4 @@ router.put(
   mastersController.changeReservationStatus
 );
 
-module.exports = router;
+export default router;
