@@ -41,4 +41,4 @@ router.post(
   reservationController.getAllImages
 );
 
-module.exports = router;
+export default router;

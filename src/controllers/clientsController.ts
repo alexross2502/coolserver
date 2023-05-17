@@ -156,12 +156,3 @@ export async function mailConfirmation(
     return res.status(400).json().end();
   }
 }
-
-export async function orderPrefillData(req, res) {
-  try {
-    const data = await Clients.findOne({ where: { id: req.user.id } });
-    return res.status(200).json(data).end();
-  } catch (e) {
-    return res.status(400).json().end();
-  }
-}
