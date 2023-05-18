@@ -362,7 +362,6 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         },
         transaction: transaction,
       });
-      console.log({ day: day, size: size });
       sendClientOrderMail(
         recipient,
         name,
