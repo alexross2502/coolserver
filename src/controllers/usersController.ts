@@ -1,33 +1,33 @@
 import { Admin, Clients, Masters } from "../models/models";
+import tokenDecoder from "../utils/tokenDecoder";
 
 export async function currentUser(req, res) {
+  let userData = null;
   try {
-    const role = req.user.role;
-    let userData;
-    switch (role) {
+    const user = tokenDecoder(req.headers.authorization);
+    switch (user.role) {
       case "admin":
         userData = await Admin.findOne({
-          where: { id: req.user.id },
+          where: { id: user.id },
           attributes: ["email"],
         });
         break;
       case "client":
         userData = await Clients.findOne({
-          where: { id: req.user.id },
+          where: { id: user.id },
           attributes: ["email", "name"],
         });
         break;
       case "master":
         userData = await Masters.findOne({
-          where: { id: req.user.id },
+          where: { id: user.id },
           attributes: ["email", "name", "surname", "rating"],
         });
       default:
-        throw new Error("not a user");
+        userData;
     }
-
     return res.status(200).json(userData).end();
   } catch (e) {
-    return res.status(400).json().end();
+    return res.status(400).json(userData).end();
   }
 }
