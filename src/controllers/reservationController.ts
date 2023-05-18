@@ -167,7 +167,7 @@ export async function destroy(req: express.Request, res: express.Response) {
 
 export async function create(req: express.Request, res: express.Response) {
   let { day, size, master_id, towns_id, clientId } = req.body;
-
+  let transaction = await sequelize.transaction();
   try {
     const errors = expressValidator.validationResult(req);
     if (!errors.isEmpty()) {
@@ -180,29 +180,39 @@ export async function create(req: express.Request, res: express.Response) {
     day = new Date(+day);
 
     if (
-      (await reservationDuplicationCheck(towns_id, master_id, start, end)) === 0
+      (await reservationDuplicationCheck(towns_id, master_id, start, end, {
+        transaction,
+      })) === 0
     ) {
       const city = await Towns.findOne({
         where: { id: towns_id },
         attributes: ["tariff"],
+        transaction: transaction,
       });
       const price = await priceCalculation(city.dataValues.tariff, size);
-      const reservation = await Reservation.create({
-        day,
-        end,
-        size,
-        master_id,
-        towns_id,
-        clientId,
-        createdAt,
-        updatedAt,
-        price,
-      });
+      const reservation = await Reservation.create(
+        {
+          day,
+          end,
+          size,
+          master_id,
+          towns_id,
+          clientId,
+          createdAt,
+          updatedAt,
+          price,
+        },
+        { transaction }
+      );
+      await transaction.commit();
       return res.status(200).json(reservation).end();
     } else {
       throw new Error("Duplication's error");
     }
   } catch (e) {
+    if (transaction) {
+      await transaction.rollback();
+    }
     return res.status(400).json({ message: e.message }).end();
   }
 }
@@ -352,6 +362,7 @@ export async function makeOrder(req: express.Request, res: express.Response) {
         },
         transaction: transaction,
       });
+      console.log({ day: day, size: size });
       sendClientOrderMail(
         recipient,
         name,

@@ -1,5 +1,10 @@
+import moment = require("moment");
 import * as nodemailer from "nodemailer";
-import { AppUrlConfirmation, transporterCredentials } from "./constants";
+import {
+  AppUrlConfirmation,
+  sizeTranslate,
+  transporterCredentials,
+} from "./constants";
 
 let transporter = nodemailer.createTransport(transporterCredentials);
 
@@ -14,13 +19,18 @@ export async function sendClientOrderMail(
   townName
 ) {
   try {
+    moment.locale("ru");
     let result = await transporter.sendMail({
       from: transporterCredentials.auth.user,
       to: recipient,
       subject: "Уведомление о резерве мастера",
       text: "This message was sent from Node js server.",
       html: `
-        Вы успешно заказали мастера ${name} ${surname} с рейтингом ${rating} на ${day} в городе: ${townName}. Размер часов - ${size.sizeTranslate}
+        Вы успешно заказали мастера ${name} ${surname} с рейтингом ${rating} на ${moment(
+        day
+      ).format("h")} часов ${moment(day).format(
+        "L"
+      )}, в городе: ${townName}. Размер часов - ${sizeTranslate[size]}
         `,
     });
   } catch (e) {
